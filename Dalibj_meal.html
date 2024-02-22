@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="kr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>병점스토리 - 급식</title>
+    <style>
+        /* Add your CSS styles here */
+    </style>
+</head>
+<body>
+    <h1>병점스토리 - 급식</h1>
+
+    <label for="dateInput">날짜 선택: </label>
+    <input type="date" id="dateInput">
+
+    <div id="meal">
+        <h2>급식</h2>
+        <ul id="mealList"></ul>
+    </div>
+
+    <script>
+        // NEIS API endpoint URL for meal data
+        const mealURL = 'https://open.neis.go.kr/hub/mealServiceDietInfo';
+        const apiKey = 'fbffee9d42554d4287deb7e938e1b9bc';
+
+        // Function to fetch meal data for a specific date
+        async function fetchMeal(date) {
+            try {
+                const response = await fetch(`${mealURL}?KEY=${apiKey}&Type=json&ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7530627&MLSV_YMD=${date}`);
+                const data = await response.json();
+                console.log("Meal API Response:", data); // Log the JSON response
+
+                // Check if the response contains meal data
+                if (data && data['mealServiceDietInfo'] && data['mealServiceDietInfo'][1] && data['mealServiceDietInfo'][1]['row']) {
+                    return data['mealServiceDietInfo'][1]['row'];
+                } else {
+                    console.error('No meal data found in the response');
+                    return null; // Return null to indicate no meal data
+                }
+            } catch (error) {
+                console.error("Error fetching meal data:", error);
+            }
+        }
+
+        // Function to display meal information for a specific date
+        async function displayMeal(date) {
+            const mealData = await fetchMeal(date);
+            if (mealData) {
+                const mealList = document.getElementById('mealList');
+                mealList.innerHTML = ''; // Clear any existing meal items
+                mealData.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `급식:<br> ${item.DDISH_NM}<br>`; // Include line break after each item
+                    mealList.appendChild(li);
+                });
+            }
+        }
+
+        // Function to handle date selection change
+        document.getElementById('dateInput').addEventListener('change', function() {
+            const selectedDate = this.value.replaceAll('-', ''); // Get selected date from the input and remove '-' characters
+            displayMeal(selectedDate);
+        });
+    </script>
+</body>
+</html>

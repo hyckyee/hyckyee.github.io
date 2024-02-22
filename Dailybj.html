@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>병점스토리</title>
+    <style>
+        /* CSS 스타일을 추가합니다. */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+        }
+        nav {
+            background-color: #444;
+            padding: 10px;
+            text-align: center;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        main {
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>병점스토리</h1>
+    </header>
+    <nav>
+        <!-- 메뉴를 추가합니다. -->
+        <a href="#" id="homeLink">홈</a>
+        <a href="#" id="announcementLink">급식</a>
+        <a href="#" id="schoolInfoLink">시간표</a>
+    </nav>
+    <main>
+        <h1>병점스토리</h1>
+    </main>
+
+    <script>
+        // 페이지 이동을 처리하는 함수를 작성합니다.
+        function navigateTohome() {
+            // 여기에서 페이지 이동 로직을 추가합니다.
+            window.location.href = "Dailybj.html";
+        }
+
+        function navigateTomeal() {
+            // 여기에서 페이지 이동 로직을 추가합니다.
+            window.location.href = "Dailybj_meal.html";
+        }
+
+        function navigateTotimetable() {
+            // 여기에서 페이지 이동 로직을 추가합니다.
+            window.location.href = "Dailybj_timetable.html";
+        }
+
+        // 각 메뉴에 이벤트 리스너를 추가하여 페이지 이동을 처리합니다.
+        document.getElementById('homeLink').addEventListener('click', function(event) {
+            event.preventDefault();
+            navigateTohome(); // 함수 호출을 추가해야 합니다.
+        });
+        document.getElementById('announcementLink').addEventListener('click', function(event) {
+            event.preventDefault();
+            navigateTomeal(); // 함수 호출을 추가해야 합니다.
+        });
+        document.getElementById('schoolInfoLink').addEventListener('click', function(event) {
+            event.preventDefault();
+            navigateTotimetable(); // 함수 호출을 추가해야 합니다.
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>병점스토리 - 급식</title>
+    <style>
+        /* CSS 스타일을 추가합니다. */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        nav {
+            background-color: #444;
+            padding: 10px;
+            text-align: center;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        h1 {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+        }
+        label {
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
+        #dateInput {
+            margin-bottom: 20px;
+        }
+        #mealList {
+            list-style-type: none;
+            padding: 0;
+        }
+        #mealList li {
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+        .button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>병점스토리 - 급식</h1>
+
+    <nav>
+        <!-- 메뉴를 추가합니다. -->
+        <a href="#" id="homeLink">홈</a>
+        <a href="#" id="announcementLink">시간표</a>
+    </nav>
+
+    <label for="dateInput">날짜 선택: </label>
+    <input type="date" id="dateInput">
+
+    <div id="meal">
+        <h2>급식</h2>
+        <ul id="mealList"></ul>
+    </div>
+
+    <!-- 이동 버튼을 추가합니다. -->
+    <button class="button" onclick="navigateToHome()">홈으로 이동</button>
+
+    <script>
+      // NEIS API endpoint URL for meal data
+      const mealURL = 'https://open.neis.go.kr/hub/mealServiceDietInfo';
+        const apiKey = 'fbffee9d42554d4287deb7e938e1b9bc';
+
+        // Function to fetch meal data for a specific date
+        async function fetchMeal(date) {
+            try {
+                const response = await fetch(`${mealURL}?KEY=${apiKey}&Type=json&ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7530627&MLSV_YMD=${date}`);
+                const data = await response.json();
+                console.log("Meal API Response:", data); // Log the JSON response
+
+                // Check if the response contains meal data
+                if (data && data['mealServiceDietInfo'] && data['mealServiceDietInfo'][1] && data['mealServiceDietInfo'][1]['row']) {
+                    return data['mealServiceDietInfo'][1]['row'];
+                } else {
+                    console.error('No meal data found in the response');
+                    return null; // Return null to indicate no meal data
+                }
+            } catch (error) {
+                console.error("Error fetching meal data:", error);
+            }
+        }
+
+        // Function to display meal information for a specific date
+        async function displayMeal(date) {
+            const mealData = await fetchMeal(date);
+            if (mealData) {
+                const mealList = document.getElementById('mealList');
+                mealList.innerHTML = ''; // Clear any existing meal items
+                mealData.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `급식:<br> ${item.DDISH_NM}<br>`; // Include line break after each item
+                    mealList.appendChild(li);
+                });
+            }
+        }
+
+        // Function to handle date selection change
+        document.getElementById('dateInput').addEventListener('change', function() {
+            const selectedDate = this.value.replaceAll('-', ''); // Get selected date from the input and remove '-' characters
+            displayMeal(selectedDate);
+        });
+
+        // 홈으로 이동하는 함수를 정의합니다.
+        function navigateToHome() {
+            window.location.href = "index.html";
+        }
+
+        // 페이지 이동을 처리하는 함수를 작성합니다.
+        function navigateTohome() {
+            // 여기에서 페이지 이동 로직을 추가합니다.
+            window.location.href = "Dailybj.html";
+        }
+
+        function navigateTotimetable() {
+            // 여기에서 페이지 이동 로직을 추가합니다.
+            window.location.href = "Dailybj_timetable.html";
+        }
+
+        // 각 메뉴에 이벤트 리스너를 추가하여 페이지 이동을 처리합니다.
+        document.getElementById('homeLink').addEventListener('click', function(event) {
+            event.preventDefault();
+            navigateTohome(); // 함수 호출을 추가해야 합니다.
+        });
+        document.getElementById('announcementLink').addEventListener('click', function(event) {
+            event.preventDefault();
+            navigateTotimetable(); // 함수 호출을 추가해야 합니다.
+        });
+    </script>
+</body>
+</html>
