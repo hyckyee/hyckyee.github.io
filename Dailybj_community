@@ -35,6 +35,11 @@
             padding: 20px;
             margin-bottom: 10px;
         }
+        .comment {
+            margin-left: 20px;
+            border-left: 2px solid #ccc;
+            padding-left: 10px;
+        }
     </style>
 </head>
 <body>
@@ -58,9 +63,10 @@
             if (postContent.trim() !== '') {
                 const post = {
                     content: postContent,
-                    timestamp: new Date().toLocaleString()
+                    timestamp: new Date().toLocaleString(),
+                    comments: [] // Add comments array to each post
                 };
-                posts.push(post);
+                posts.unshift(post); // Push post to the beginning of the array
                 renderPosts();
                 document.getElementById('postContent').value = ''; // Clear input field
             }
@@ -73,7 +79,31 @@
                 const li = document.createElement('li');
                 li.className = 'post';
                 li.textContent = `내용: ${post.content} - 작성 시간: ${post.timestamp}`;
+                // Add comment form to each post
+                const commentForm = document.createElement('form');
+                commentForm.innerHTML = `<input type="text" class="commentInput" placeholder="댓글을 입력하세요...">
+                                          <button type="submit">댓글 작성</button>`;
+                li.appendChild(commentForm);
+                const commentList = document.createElement('ul');
+                commentList.className = 'commentList';
+                post.comments.forEach(comment => {
+                    const commentItem = document.createElement('li');
+                    commentItem.textContent = comment;
+                    commentList.appendChild(commentItem);
+                });
+                li.appendChild(commentList);
                 postsList.appendChild(li);
+                // Add event listener to comment form
+                commentForm.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    const commentInput = this.querySelector('.commentInput');
+                    const commentContent = commentInput.value;
+                    if (commentContent.trim() !== '') {
+                        post.comments.push(commentContent);
+                        renderPosts();
+                        commentInput.value = ''; // Clear comment input field
+                    }
+                });
             });
         }
     </script>
