@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>익명 커뮤니티</title>
+    <style>
+        /* CSS 스타일을 추가합니다. */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+        }
+        main {
+            padding: 20px;
+        }
+        #postForm {
+            margin-bottom: 20px;
+        }
+        #posts {
+            list-style-type: none;
+            padding: 0;
+        }
+        .post {
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>익명 커뮤니티</h1>
+    </header>
+    <main>
+        <form id="postForm">
+            <textarea id="postContent" placeholder="내용을 입력하세요..." rows="4" cols="50"></textarea><br>
+            <button type="submit">게시</button>
+        </form>
+        <ul id="posts"></ul>
+    </main>
+
+    <script>
+        const posts = [];
+
+        document.getElementById('postForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const postContent = document.getElementById('postContent').value;
+            if (postContent.trim() !== '') {
+                const post = {
+                    content: postContent,
+                    timestamp: new Date().toLocaleString()
+                };
+                posts.push(post);
+                renderPosts();
+                document.getElementById('postContent').value = ''; // Clear input field
+            }
+        });
+
+        function renderPosts() {
+            const postsList = document.getElementById('posts');
+            postsList.innerHTML = '';
+            posts.forEach(post => {
+                const li = document.createElement('li');
+                li.className = 'post';
+                li.textContent = `내용: ${post.content} - 작성 시간: ${post.timestamp}`;
+                postsList.appendChild(li);
+            });
+        }
+    </script>
+</body>
+</html>
