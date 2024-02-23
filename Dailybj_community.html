@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>익명 커뮤니티</title>
+    <!-- Firebase SDK 추가 -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.2/firebase-database.js"></script>
     <style>
         /* CSS 스타일을 추가합니다. */
         body {
@@ -55,75 +58,66 @@
     </main>
 
     <script>
-        let posts = [];
+        // Firebase 구성 정보
+        const firebaseConfig = {
+              apiKey: "AIzaSyCYBpnsvR8DpS8VxsVEFp7rahCJx4YWu4c",
+    authDomain: "byeongjeomstory.firebaseapp.com",
+    databaseURL: "https://byeongjeomstory-default-rtdb.firebaseio.com",
+    projectId: "byeongjeomstory",
+    storageBucket: "byeongjeomstory.appspot.com",
+    messagingSenderId: "413439246892",
+    appId: "1:413439246892:web:abcd1e13e6d445c4670789",
+    measurementId: "G-VMVXF8JGZS
+        };
 
+        // Firebase 앱 초기화
+        firebase.initializeApp(firebaseConfig);
+
+        // Firebase 데이터베이스 참조
+        const db = firebase.database();
+        const postsRef = db.ref('posts');
+
+        // 글 작성 폼 이벤트 리스너
         document.getElementById('postForm').addEventListener('submit', function(event) {
             event.preventDefault();
             const postContent = document.getElementById('postContent').value;
             if (postContent.trim() !== '') {
-                const post = {
+                const postData = {
                     content: postContent,
-                    timestamp: new Date().toLocaleString(),
-                    comments: []
+                    timestamp: new Date().toLocaleString()
                 };
-                posts.unshift(post);
-                savePostsToJSON();
-                renderPosts();
+                postsRef.push(postData);
                 document.getElementById('postContent').value = '';
             }
         });
 
-        function savePostsToJSON() {
-            localStorage.setItem('posts', JSON.stringify(posts));
-        }
-
-        function loadPostsFromJSON() {
-            const storedPosts = localStorage.getItem('posts');
-            if (storedPosts) {
-                posts = JSON.parse(storedPosts);
-            }
-        }
-
-        function renderPosts() {
+        // 글 및 댓글 렌더링
+        postsRef.on('value', function(snapshot) {
             const postsList = document.getElementById('posts');
             postsList.innerHTML = '';
-            posts.forEach(post => {
+            snapshot.forEach(function(childSnapshot) {
+                const post = childSnapshot.val();
+                const postKey = childSnapshot.key;
                 const li = document.createElement('li');
                 li.className = 'post';
                 li.textContent = `내용: ${post.content} - 작성 시간: ${post.timestamp}`;
-                const commentForm = document.createElement('form');
-                commentForm.innerHTML = `<input type="text" class="commentInput" placeholder="댓글을 입력하세요...">
-                                          <button type="submit">댓글 작성</button>`;
-                li.appendChild(commentForm);
-                const commentList = document.createElement('ul');
-                commentList.className = 'commentList';
-                post.comments.forEach(comment => {
-                    const commentItem = document.createElement('li');
-                    commentItem.textContent = comment;
-                    commentList.appendChild(commentItem);
-                });
-                li.appendChild(commentList);
                 postsList.appendChild(li);
-                commentForm.addEventListener('submit', function(event) {
-                    event.preventDefault();
-                    const commentInput = this.querySelector('.commentInput');
-                    const commentContent = commentInput.value;
-                    if (commentContent.trim() !== '') {
-                        post.comments.push(commentContent);
-                        savePostsToJSON();
-                        renderPosts();
-                        commentInput.value = '';
-                    }
+
+                // 댓글 렌더링
+                const commentsRef = db.ref('comments/' + postKey);
+                commentsRef.on('value', function(commentsSnapshot) {
+                    const commentList = document.createElement('ul');
+                    commentList.className = 'commentList';
+                    commentsSnapshot.forEach(function(commentSnapshot) {
+                        const comment = commentSnapshot.val();
+                        const commentItem = document.createElement('li');
+                        commentItem.textContent = comment;
+                        commentList.appendChild(commentItem);
+                    });
+                    li.appendChild(commentList);
                 });
             });
-        }
-
-        // 페이지가 로드될 때 저장된 글을 불러와서 표시합니다.
-        window.addEventListener('load', function() {
-            loadPostsFromJSON();
-            renderPosts();
         });
     </script>
 </body>
 </html>
-
