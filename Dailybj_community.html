@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>익명 커뮤니티</title>
-    <!-- Firebase SDK 버전 8을 사용하는 CDN 링크 -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js" type="module"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js" type="module"></script>
+    <!-- Firebase SDK 추가 -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.2/firebase-database.js"></script>
     <style>
         /* CSS 스타일을 추가합니다. */
         body {
@@ -47,7 +47,7 @@
 </head>
 <body>
     <header>
-        <h1>병점스토리 커뮤니티</h1>
+        <h1>익명 커뮤니티</h1>
     </header>
     <main>
         <form id="postForm">
@@ -57,11 +57,8 @@
         <ul id="posts"></ul>
     </main>
 
-    <script type="module">
+    <script>
         // Firebase 구성 정보
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.2/firebase-app.js";
-        import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/9.6.2/firebase-database.js";
-
         const firebaseConfig = {
             apiKey: "AIzaSyCYBpnsvR8DpS8VxsVEFp7rahCJx4YWu4c",
   authDomain: "byeongjeomstory.firebaseapp.com",
@@ -74,12 +71,12 @@
         };
 
         // Firebase 앱 초기화
-        const app = initializeApp(firebaseConfig);
+        const app = firebase.initializeApp(firebaseConfig);
 
         // Firebase 데이터베이스 참조
-        const db = getDatabase();
-        const postsRef = ref(db, 'posts');
-        const commentsRef = ref(db, 'comments');
+        const db = app.database();
+        const postsRef = db.ref('posts');
+        const commentsRef = db.ref('comments');
 
         // 글 작성 폼 이벤트 리스너
         document.getElementById('postForm').addEventListener('submit', function(event) {
@@ -90,7 +87,7 @@
                     content: postContent,
                     timestamp: new Date().toLocaleString()
                 };
-                const newPostRef = push(postsRef, postData); // 새로운 게시물 추가 후 참조를 반환
+                const newPostRef = postsRef.push(postData); // 새로운 게시물 추가 후 참조를 반환
                 const postId = newPostRef.key; // 새로운 게시물의 고유 키 가져오기
                 document.getElementById('postContent').value = '';
 
@@ -102,7 +99,7 @@
 
         // 댓글 추가 함수
         function addComment(postId, commentContent) {
-            const newCommentRef = push(ref(commentsRef, postId)); // 새로운 댓글 추가 후 참조를 반환
+            const newCommentRef = commentsRef.child(postId).push(); // 새로운 댓글 추가 후 참조를 반환
             newCommentRef.set({
                 content: commentContent,
                 timestamp: new Date().toLocaleString()
@@ -110,24 +107,25 @@
         }
 
         // 글 및 댓글 렌더링
-        const postsList = document.getElementById('posts');
-        onValue(postsRef, (snapshot) => {
+        postsRef.orderByChild('timestamp').on('value', function(snapshot) {
+            const postsList = document.getElementById('posts');
             postsList.innerHTML = '';
-            snapshot.forEach((childSnapshot) => {
+            snapshot.forEach(function(childSnapshot) {
                 const post = childSnapshot.val();
                 const postKey = childSnapshot.key;
                 const li = document.createElement('li');
                 li.className = 'post';
                 li.textContent = `내용: ${post.content} - 작성 시간: ${post.timestamp}`;
-                postsList.appendChild(li);
+                postsList.prepend(li); // 최신 게시물을 위에 노출하기 위해 prepend() 사용
 
-                // 댓글 렌더링
-                const commentsSnapshot = snapshot.child(postKey).child('comments');
-                commentsSnapshot.forEach((commentSnapshot) => {
-                    const comment = commentSnapshot.val();
-                    const commentItem = document.createElement('li');
-                    commentItem.textContent = `댓글: ${comment.content} - 작성 시간: ${comment.timestamp}`;
-                    li.appendChild(commentItem);
+                // 해당 게시물의 댓글 가져오기
+                commentsRef.child(postKey).once('value', function(commentsSnapshot) {
+                    commentsSnapshot.forEach(function(commentSnapshot) {
+                        const comment = commentSnapshot.val();
+                        const commentItem = document.createElement('li');
+                        commentItem.textContent = `댓글: ${comment.content} - 작성 시간: ${comment.timestamp}`;
+                        li.appendChild(commentItem);
+                    });
                 });
             });
         });
