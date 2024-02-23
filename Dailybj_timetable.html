@@ -88,79 +88,79 @@
         const timetableURL = 'https://open.neis.go.kr/hub/hisTimetable';
         const apiKey = 'fbffee9d42554d4287deb7e938e1b9bc';
     
-        // Function to fetch timetable data for a specific grade, class, and date
-        async function fetchTimetable(grade, classCode, date) {
-            try {
-                const response = await fetch(`${timetableURL}?KEY=${apiKey}&Type=json&pIndex=1&pSize=100&ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7530627&GRADE=${grade}&CLASS_NM=${classCode}&TI_FROM_YMD=${date}`);
-                const data = await response.json(); // Parse the JSON response directly
-                console.log("Timetable API Response:", data); // Log the response for debugging
-                return data;
-            } catch (error) {
-                console.error("Error fetching timetable data:", error);
-            }
-        }
-    
-        // Function to display timetable for a specific grade, class, and date
-        async function displayTimetable(grade, classCode, date) {
-            const timetableData = await fetchTimetable(grade, classCode, date);
-            if (timetableData && timetableData.hisTimetable) {
-                const timetableList = document.getElementById('timetableList');
-                timetableList.innerHTML = ''; // Clear any existing timetable items
-                const items = timetableData.hisTimetable;
-                items.forEach(item => {
-                    if (item.row) {
-                        const classTimetable = item.row;
-                        classTimetable.forEach(timetableItem => {
-                            if (timetableItem.ALL_TI_YMD === date) { // Filter by date
-                                const li = document.createElement('li');
-                                li.textContent = `반: ${timetableItem.CLASS_NM}, 과목: ${timetableItem.ITRT_CNTNT}, 시간: ${timetableItem.PERIO}`;
-                                li.classList.add('list-group-item');
-                                timetableList.appendChild(li);
-                            }
-                        });
-                    }
-                });
-            } else {
-                console.error("Error fetching or processing timetable data:", timetableData);
-            }
-        }
+   // Function to fetch timetable data for a specific grade, class, and date
+async function fetchTimetable( grade, classCode, date) {
+    try {
+        const response = await fetch(`${timetableURL}?KEY=${apiKey}&Type=json&pIndex=1&pSize=100&ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7530627&GRADE=${grade}&CLASS_NM=${classCode}&TI_FROM_YMD=${date}`);
+        const data = await response.json(); // Parse the JSON response directly
+        console.log("Timetable API Response:", data); // Log the response for debugging
+        return data;
+    } catch (error) {
+        console.error("Error fetching timetable data:", error);
+    }
+}
 
-        // Function to handle date selection change
-        document.getElementById('dateInput').addEventListener('change', function() {
-            const selectedDate = this.value.replaceAll('-', ''); // Get selected date from the input and remove '-' characters
-            const selectedGrade = document.getElementById('gradeSelect').value; // Get selected grade from the dropdown
-            const selectedClass = document.getElementById('classSelect').value; // Get selected class from the dropdown
-            displayTimetable(selectedGrade, selectedClass, selectedDate);
-        });
-    
-        // Function to handle grade selection change
-        document.getElementById('gradeSelect').addEventListener('change', async function() {
-            const selectedGrade = this.value; // Get selected grade from the dropdown
-    
-            // Fetch class data based on the selected grade
-            const classSelect = document.getElementById('classSelect');
-            classSelect.innerHTML = ''; // Clear previous options
-            const response = await fetch(`${timetableURL}?KEY=${apiKey}&Type=json&GRADE=${selectedGrade}`);
-            const data = await response.json();
-            if (data && data.RESULT && data.hisTimetable) {
-                const classes = data.hisTimetable.map(item => item.CLASS_NM);
-                classes.forEach(className => {
-                    const option = document.createElement('option');
-                    option.value = className;
-                    option.textContent = className;
-                    classSelect.appendChild(option);
-                });
-                classSelect.disabled = false; // Enable class select after loading classes
-            }
-        });
-    
-        // Function to handle class selection change
-        document.getElementById('classSelect').addEventListener('change', function() {
-            const selectedDate = document.getElementById('dateInput').value.replaceAll('-', ''); // Get selected date from the input and remove '-' characters
-            const selectedGrade = document.getElementById('gradeSelect').value; // Get selected grade from the dropdown
-            const selectedClass = this.value; // Get selected class from the dropdown
-            displayTimetable(selectedGrade, selectedClass, selectedDate);
-        });
+// Function to handle grade selection change
+document.getElementById('gradeSelect').addEventListener('change', async function() {
+    const selectedGrade = this.value; // Get selected grade from the dropdown
+
+    // Set the class select to respective classes for each grade
+    const classSelect = document.getElementById('classSelect');
+    classSelect.innerHTML = ''; // Clear previous options
+    for (let i = 1; i <= 10; i++) {
+        const option = document.createElement('option');
+        option.value = i.toString();
+        option.textContent = `${i}반`;
+        classSelect.appendChild(option);
+    }
+    classSelect.disabled = false; // Enable class select
+
+    // Fetch timetable data for the selected grade and class
+    const selectedDate = document.getElementById('dateInput').value.replaceAll('-', ''); // Get selected date from the input and remove '-' characters
+    displayTimetable(selectedGrade, '1', selectedDate); // Default to 1반 when grade changes
+});
+
+// Function to handle class selection change
+document.getElementById('classSelect').addEventListener('change', function() {
+    const selectedDate = document.getElementById('dateInput').value.replaceAll('-', ''); // Get selected date from the input and remove '-' characters
+    const selectedGrade = document.getElementById('gradeSelect').value; // Get selected grade from the dropdown
+    const selectedClass = this.value; // Get selected class from the dropdown
+    displayTimetable(selectedGrade, selectedClass, selectedDate);
+});
+
+
+// Function to display timetable for a specific grade, class, and date
+async function displayTimetable(grade, classCode, date) {
+    try {
+        const response = await fetch(`${timetableURL}?KEY=${apiKey}&Type=json&pIndex=1&pSize=100&ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7530627&GRADE=${grade}&CLASS_NM=${classCode}&TI_FROM_YMD=${date}`);
+        const data = await response.json(); // Parse the JSON response directly
+        console.log("Timetable API Response:", data); // Log the response for debugging
+        
+        const timetableList = document.getElementById('timetableList');
+        timetableList.innerHTML = ''; // Clear any existing timetable items
+        
+        if (data && data.hisTimetable) {
+            const items = data.hisTimetable;
+            items.forEach(item => {
+                if (item.row) {
+                    const classTimetable = item.row;
+                    classTimetable.forEach(timetableItem => {
+                        if (timetableItem.ALL_TI_YMD === date && timetableItem.CLASS_NM === classCode) { // Filter by date and selected class
+                            const li = document.createElement('li');
+                            li.textContent = `반: ${timetableItem.CLASS_NM}, 과목: ${timetableItem.ITRT_CNTNT}, 시간: ${timetableItem.PERIO}`;
+                            li.classList.add('list-group-item');
+                            timetableList.appendChild(li);
+                        }
+                    });
+                }
+            });
+        } else {
+            console.error("Error fetching or processing timetable data:", data);
+        }
+    } catch (error) {
+        console.error("Error fetching timetable data:", error);
+    }
+}
 
         // Function to navigate to home page
         function navigateToHome() {
@@ -176,6 +176,41 @@
         function navigateToTimetable() {
             window.location.href = "Dailybj_timetable.html";
         }
+        // Function to handle date selection change
+document.getElementById('dateInput').addEventListener('change', function() {
+    const selectedDate = this.value.replaceAll('-', ''); // Get selected date from the input and remove '-' characters
+    const selectedGrade = document.getElementById('gradeSelect').value; // Get selected grade from the dropdown
+    const selectedClass = document.getElementById('classSelect').value; // Get selected class from the dropdown
+    displayTimetable(selectedGrade, selectedClass, selectedDate);
+});
+
+// Function to handle grade selection change
+document.getElementById('gradeSelect').addEventListener('change', async function() {
+    const selectedGrade = this.value; // Get selected grade from the dropdown
+
+    // Set the class select to respective classes for each grade
+    const classSelect = document.getElementById('classSelect');
+    classSelect.innerHTML = ''; // Clear previous options
+    for (let i = 1; i <= 10; i++) {
+        const option = document.createElement('option');
+        option.value = i.toString();
+        option.textContent = `${i}반`;
+        classSelect.appendChild(option);
+    }
+    classSelect.disabled = false; // Enable class select
+
+    // Fetch timetable data for the selected grade and class
+    const selectedDate = document.getElementById('dateInput').value.replaceAll('-', ''); // Get selected date from the input and remove '-' characters
+    displayTimetable(selectedGrade, '1', selectedDate); // Default to 1반 when grade changes
+});
+
+// Function to handle class selection change
+document.getElementById('classSelect').addEventListener('change', function() {
+    const selectedDate = document.getElementById('dateInput').value.replaceAll('-', ''); // Get selected date from the input and remove '-' characters
+    const selectedGrade = document.getElementById('gradeSelect').value; // Get selected grade from the dropdown
+    const selectedClass = this.value; // Get selected class from the dropdown
+    displayTimetable(selectedGrade, selectedClass, selectedDate);
+});
     </script>
 </body>
 </html>
