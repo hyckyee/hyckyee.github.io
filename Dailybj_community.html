@@ -55,7 +55,7 @@
     </main>
 
     <script>
-        const posts = [];
+        let posts = [];
 
         document.getElementById('postForm').addEventListener('submit', function(event) {
             event.preventDefault();
@@ -64,13 +64,25 @@
                 const post = {
                     content: postContent,
                     timestamp: new Date().toLocaleString(),
-                    comments: [] // Add comments array to each post
+                    comments: []
                 };
-                posts.unshift(post); // Push post to the beginning of the array
+                posts.unshift(post);
+                savePostsToJSON();
                 renderPosts();
-                document.getElementById('postContent').value = ''; // Clear input field
+                document.getElementById('postContent').value = '';
             }
         });
+
+        function savePostsToJSON() {
+            localStorage.setItem('posts', JSON.stringify(posts));
+        }
+
+        function loadPostsFromJSON() {
+            const storedPosts = localStorage.getItem('posts');
+            if (storedPosts) {
+                posts = JSON.parse(storedPosts);
+            }
+        }
 
         function renderPosts() {
             const postsList = document.getElementById('posts');
@@ -79,7 +91,6 @@
                 const li = document.createElement('li');
                 li.className = 'post';
                 li.textContent = `내용: ${post.content} - 작성 시간: ${post.timestamp}`;
-                // Add comment form to each post
                 const commentForm = document.createElement('form');
                 commentForm.innerHTML = `<input type="text" class="commentInput" placeholder="댓글을 입력하세요...">
                                           <button type="submit">댓글 작성</button>`;
@@ -93,19 +104,25 @@
                 });
                 li.appendChild(commentList);
                 postsList.appendChild(li);
-                // Add event listener to comment form
                 commentForm.addEventListener('submit', function(event) {
                     event.preventDefault();
                     const commentInput = this.querySelector('.commentInput');
                     const commentContent = commentInput.value;
                     if (commentContent.trim() !== '') {
                         post.comments.push(commentContent);
+                        savePostsToJSON();
                         renderPosts();
-                        commentInput.value = ''; // Clear comment input field
+                        commentInput.value = '';
                     }
                 });
             });
         }
+
+        // 페이지가 로드될 때 저장된 글을 불러와서 표시합니다.
+        window.addEventListener('load', function() {
+            loadPostsFromJSON();
+            renderPosts();
+        });
     </script>
 </body>
 </html>
