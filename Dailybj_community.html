@@ -20,6 +20,12 @@
             color: #fff;
             padding: 10px;
             text-align: center;
+            position: relative; /* 버튼을 상대적으로 위치시키기 위해 */
+        }
+        header a {
+            color: #fff;
+            text-decoration: none;
+            margin-right: 10px; /* 버튼 사이의 간격을 추가 */
         }
         main {
             padding: 20px;
@@ -54,6 +60,12 @@
 <body>
     <header>
         <h1>병점스토리 커뮤니티</h1>
+        <div>
+            <!-- 다른 페이지로 이동하는 링크 추가 -->
+            <a href="index.html">홈으로</a>
+            <a href="Dailybj_meal.html">식단표</a>
+            <a href="Dailybj_timetable.html">시간표</a>
+        </div>
     </header>
     <main>
         <form id="postForm">
@@ -61,12 +73,6 @@
             <button type="submit">게시</button>
         </form>
         <ul id="posts"></ul>
-        <div>
-            <!-- 다른 페이지로 이동하는 링크 추가 -->
-            <a href="index.html">홈으로</a>
-            <a href="Dailybj_meal.html">식단표</a>
-            <a href="Dailybj_timetable.html">시간표</a>
-        </div>
     </main>
 
     <script type="module">
