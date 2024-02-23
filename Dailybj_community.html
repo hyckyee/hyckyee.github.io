@@ -60,14 +60,15 @@
     <script>
         // Firebase 구성 정보
         const firebaseConfig = {
-            apiKey: "AIzaSyCYBpnsvR8DpS8VxsVEFp7rahCJx4YWu4c",
-            authDomain: "byeongjeomstory.firebaseapp.com",
-            databaseURL: "https://byeongjeomstory-default-rtdb.firebaseio.com",
-            projectId: "byeongjeomstory",
-            storageBucket: "byeongjeomstory.appspot.com",
-            messagingSenderId: "413439246892",
-            appId: "1:413439246892:web:abcd1e13e6d445c4670789",
-            measurementId: "G-VMVXF8JGZS"};
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            measurementId: "YOUR_MEASUREMENT_ID"
+        };
 
         // Firebase 앱 초기화
         const app = firebase.initializeApp(firebaseConfig);
@@ -75,6 +76,7 @@
         // Firebase 데이터베이스 참조
         const db = app.database();
         const postsRef = db.ref('posts');
+        const commentsRef = db.ref('comments');
 
         // 글 작성 폼 이벤트 리스너
         document.getElementById('postForm').addEventListener('submit', function(event) {
@@ -85,10 +87,24 @@
                     content: postContent,
                     timestamp: new Date().toLocaleString()
                 };
-                postsRef.push(postData);
+                const newPostRef = postsRef.push(postData); // 새로운 게시물 추가 후 참조를 반환
+                const postId = newPostRef.key; // 새로운 게시물의 고유 키 가져오기
                 document.getElementById('postContent').value = '';
+
+                // 댓글 추가 함수 호출
+                addComment(postId, "첫 번째 댓글입니다.");
+                addComment(postId, "두 번째 댓글입니다.");
             }
         });
+
+        // 댓글 추가 함수
+        function addComment(postId, commentContent) {
+            const newCommentRef = commentsRef.child(postId).push(); // 새로운 댓글 추가 후 참조를 반환
+            newCommentRef.set({
+                content: commentContent,
+                timestamp: new Date().toLocaleString()
+            });
+        }
 
         // 글 및 댓글 렌더링
         postsRef.on('value', function(snapshot) {
@@ -103,17 +119,12 @@
                 postsList.appendChild(li);
 
                 // 댓글 렌더링
-                const commentsRef = db.ref('comments/' + postKey);
-                commentsRef.on('value', function(commentsSnapshot) {
-                    const commentList = document.createElement('ul');
-                    commentList.className = 'commentList';
-                    commentsSnapshot.forEach(function(commentSnapshot) {
-                        const comment = commentSnapshot.val();
-                        const commentItem = document.createElement('li');
-                        commentItem.textContent = comment;
-                        commentList.appendChild(commentItem);
-                    });
-                    li.appendChild(commentList);
+                const commentsSnapshot = snapshot.child(postKey).child('comments');
+                commentsSnapshot.forEach(function(commentSnapshot) {
+                    const comment = commentSnapshot.val();
+                    const commentItem = document.createElement('li');
+                    commentItem.textContent = `댓글: ${comment.content} - 작성 시간: ${comment.timestamp}`;
+                    li.appendChild(commentItem);
                 });
             });
         });
