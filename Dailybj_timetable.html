@@ -149,7 +149,7 @@ async function displayTimetable(grade, classCode, date) {
                     classTimetable.forEach(timetableItem => {
                         if (timetableItem.ALL_TI_YMD === date && timetableItem.CLASS_NM === classCode) { // Filter by date and selected class
                             const li = document.createElement('li');
-                            li.textContent = `[${timetableItem.CLASS_NM}반], ${timetableItem.PERIO}교시: , 과목: ${timetableItem.ITRT_CNTNT}`;
+                            li.textContent = `[${timetableItem.CLASS_NM}반], ${timetableItem.PERIO}교시: ${timetableItem.ITRT_CNTNT}`;
                             li.classList.add('list-group-item');
                             timetableList.appendChild(li);
                         }
