@@ -20,6 +20,12 @@
             color: #fff;
             padding: 10px;
             text-align: center;
+            position: relative; /* 버튼을 상대적으로 위치시키기 위해 */
+        }
+        header a {
+            color: #fff;
+            text-decoration: none;
+            margin-right: 10px; /* 버튼 사이의 간격을 추가 */
         }
         main {
             padding: 20px;
@@ -44,11 +50,22 @@
             padding-left: 10px;
             margin-top: 10px; /* 각 댓글 사이의 간격 조정 */
         }
+        /* 작성 시간 스타일 조정 */
+        .timestamp {
+            font-size: 0.8em; /* 작은 크기로 조절 */
+            font-style: italic; /* 기울임꼴로 변경 */
+        }
     </style>
 </head>
 <body>
     <header>
         <h1>병점스토리 커뮤니티</h1>
+        <div>
+            <!-- 다른 페이지로 이동하는 링크 추가 -->
+            <a href="index.html">홈으로</a>
+            <a href="Dailybj_meal.html">식단표</a>
+            <a href="Dailybj_timetable.html">시간표</a>
+        </div>
     </header>
     <main>
         <form id="postForm">
@@ -56,12 +73,6 @@
             <button type="submit">게시</button>
         </form>
         <ul id="posts"></ul>
-        <div>
-            <!-- 다른 페이지로 이동하는 링크 추가 -->
-            <a href="index.html">홈으로</a>
-            <a href="Dailybj_meal.html">식단표</a>
-            <a href="Dailybj_timetable.html">시간표</a>
-        </div>
     </main>
 
     <script type="module">
@@ -128,7 +139,7 @@
                 const postKey = childSnapshot.key;
                 const li = document.createElement('li');
                 li.className = 'post';
-                li.textContent = `내용: ${post.content} - 작성 시간: ${post.timestamp}`;
+                li.innerHTML = `내용: ${post.content} - 작성 시간: <span class="timestamp">${post.timestamp}</span>`;
 
                 // 댓글 입력란 및 버튼을 담을 div 생성
                 const commentContainer = document.createElement('div');
