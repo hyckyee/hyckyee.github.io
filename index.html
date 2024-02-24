@@ -46,6 +46,7 @@
         <a href="#" id="announcementLink">급식</a>
         <a href="#" id="schoolInfoLink">시간표</a>
         <a href="#" id="communityLink">커뮤니티(베타)</a> <!-- 커뮤니티 이동 버튼 -->
+        <a href="#" id="fileshare">파일공유서비스</a>
     </nav>
     <main>
         <h1>병점스토리</h1>
@@ -73,6 +74,11 @@
             window.location.href = "Dailybj_community.html";
         }
 
+        function navigateTofileshare() {
+            // 여기에서 페이지 이동 로직을 추가합니다.
+            window.location.href = "Dailybj_fileshare.html";
+        }
+
         // 각 메뉴에 이벤트 리스너를 추가하여 페이지 이동을 처리합니다.
         document.getElementById('homeLink').addEventListener('click', function(event) {
             event.preventDefault();
@@ -89,6 +95,11 @@
         document.getElementById('communityLink').addEventListener('click', function(event) {
             event.preventDefault();
             navigateToCommunity(); // 함수 호출을 추가해야 합니다.
+        });
+
+        document.getElementById('fileshare').addEventListener('click', function(event) {
+            event.preventDefault();
+            navigateTofileshare(); // 함수 호출을 추가해야 합니다.
         });
     </script>
 </body>
