@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>병점스토리 파일공유</title>
     <style>
+        /* CSS 스타일 */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
@@ -96,13 +97,13 @@
         document.addEventListener('DOMContentLoaded', async function() {
             const firebaseConfig = {
                 apiKey: "AIzaSyCYBpnsvR8DpS8VxsVEFp7rahCJx4YWu4c",
-                authDomain: "byeongjeomstory.firebaseapp.com",
-                databaseURL: "https://byeongjeomstory-default-rtdb.firebaseio.com",
-                projectId: "byeongjeomstory",
-                storageBucket: "byeongjeomstory.appspot.com",
-                messagingSenderId: "413439246892",
-                appId: "1:413439246892:web:abcd1e13e6d445c4670789",
-                measurementId: "G-VMVXF8JGZS"
+            authDomain: "byeongjeomstory.firebaseapp.com",
+            databaseURL: "https://byeongjeomstory-default-rtdb.firebaseio.com",
+            projectId: "byeongjeomstory",
+            storageBucket: "byeongjeomstory.appspot.com",
+            messagingSenderId: "413439246892",
+            appId: "1:413439246892:web:abcd1e13e6d445c4670789",
+            measurementId: "G-VMVXF8JGZS"
             };
 
             const app = initializeApp(firebaseConfig);
@@ -127,8 +128,33 @@
                     link.href = downloadURL;
                     link.textContent = `${fileName} (${fileSize} bytes)`;
                     listItem.appendChild(link);
+                    
+                    // "신고" 버튼 추가
+                    const reportButton = document.createElement('button');
+                    reportButton.textContent = '신고';
+                    reportButton.addEventListener('click', () => {
+                        reportFile(fileName);
+                    });
+                    listItem.appendChild(reportButton);
+                    
                     fileListContainer.appendChild(listItem);
                 });
+            }
+
+            // 파일 신고 함수
+            async function reportFile(fileName) {
+                // Firestore에 파일 정보 저장
+                try {
+                    await addDoc(collection(db, "reports"), {
+                        fileName: fileName,
+                        reportedAt: serverTimestamp()
+                    });
+                    console.log('파일 신고됨:', fileName);
+                    alert('파일이 신고되었습니다.');
+                } catch (error) {
+                    console.error("파일 신고 오류: ", error);
+                    alert('파일 신고 중 오류가 발생했습니다.');
+                }
             }
 
             // 파일 업로드 함수
@@ -154,7 +180,7 @@
                     // 파일 업로드 완료 메시지 표시
                     alert('파일이 업로드되었습니다.');
                 } catch (error) {
-                    console.error("Error uploading file: ", error);
+                    console.error("파일 업로드 오류: ", error);
                     alert('파일 업로드 중 오류가 발생했습니다.');
                 }
             }

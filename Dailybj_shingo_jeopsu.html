@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>파일 신고 조회 및 삭제</title>
+    <style>
+        /* CSS 스타일 */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 20px;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        #fileList {
+            list-style: none;
+            padding: 0;
+        }
+        #fileList li {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .file-info {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .delete-button {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .delete-button:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>파일 신고 조회 및 삭제</h1>
+    </header>
+    <div class="container">
+        <h2>신고된 파일 목록</h2>
+        <ul id="fileList"></ul>
+    </div>
+
+    <!-- Firebase SDK 로드 -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js';
+        import { getFirestore, collection, getDocs, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js';
+        import { getStorage, ref, deleteObject, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-storage.js';
+
+        // Firebase 구성 정보
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYBpnsvR8DpS8VxsVEFp7rahCJx4YWu4c",
+            authDomain: "byeongjeomstory.firebaseapp.com",
+            databaseURL: "https://byeongjeomstory-default-rtdb.firebaseio.com",
+            projectId: "byeongjeomstory",
+            storageBucket: "byeongjeomstory.appspot.com",
+            messagingSenderId: "413439246892",
+            appId: "1:413439246892:web:abcd1e13e6d445c4670789",
+            measurementId: "G-VMVXF8JGZS"
+        };
+
+        // Firebase 초기화
+        const app = initializeApp(firebaseConfig);
+
+        // Firebase Firestore 및 Storage 참조
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // 파일 신고 목록 조회
+        async function loadReportedFiles() {
+            const fileList = document.getElementById('fileList');
+
+            // 'reports' 컬렉션에서 데이터 가져오기
+            const querySnapshot = await getDocs(collection(db, 'reports'));
+            fileList.innerHTML = ''; // 기존 목록 초기화
+            querySnapshot.forEach((doc) => {
+                const fileId = doc.id; // 문서 ID를 파일 식별자로 사용
+                const fileData = doc.data();
+                const fileName = fileData.fileName; // 파일 이름 가져오기
+                const originalName = fileData.originalName; // 원본 파일 이름 가져오기
+
+                // 파일 위치 생성
+                const downloadURL = `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/files%2F${encodeURIComponent(fileName)}?alt=media`;
+
+                // 리스트 아이템 생성
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <div class="file-info">파일 이름: ${fileName}</div>
+                    <div class="file-info">원본 이름: ${originalName}</div>
+                    <div class="file-info">파일 위치: <a href="${downloadURL}" target="_blank">${downloadURL}</a></div>
+                    <a href="#" class="delete-button" data-file-id="${fileId}">삭제</a>
+                `;
+
+                // 삭제 버튼 클릭 이벤트 핸들러 추가
+                const deleteButton = listItem.querySelector('.delete-button');
+                deleteButton.addEventListener('click', () => deleteReportedFileByPath(fileName));
+
+                // 목록에 추가
+                fileList.appendChild(listItem);
+            });
+        }
+
+    // 파일 삭제
+async function deleteReportedFileByPath(filePath) {
+    try {
+        // 파일 존재 여부 확인
+        const fileRef = ref(storage, `files/${filePath}`);
+        const url = await getDownloadURL(fileRef); // 파일의 다운로드 URL 가져오기 시도
+
+        // 파일이 존재하면 삭제 진행
+        if (url) {
+            await deleteObject(fileRef);
+
+            // 파일이 성공적으로 삭제되면 Firestore에서 파일 신고 기록 삭제
+            const querySnapshot = await getDocs(collection(db, 'reports'));
+            querySnapshot.forEach(async (doc) => {
+                const fileData = doc.data();
+                if (fileData.fileName === filePath) {
+                    await deleteDoc(doc.ref);
+                }
+            });
+
+            // 파일 삭제 시 Firestore에서 파일 및 업로드 기록 삭제
+            await deleteFileAndRecords(filePath);
+        } else {
+            throw new Error('파일이 존재하지 않습니다.');
+        }
+    } catch (error) {
+        // 파일이 존재하지 않거나 삭제 중 오류가 발생한 경우
+        console.error('파일 삭제 중 오류 발생:', error);
+        alert('파일 삭제 중 오류가 발생했습니다.');
+    }
+}
+
+
+        // 파일 및 업로드 기록 삭제
+async function deleteFileAndRecords(fileName) {
+    try {
+        // Firestore에서 파일 신고 기록 삭제
+        const reportsCollection = collection(db, 'reports');
+        const reportsQuerySnapshot = await getDocs(reportsCollection);
+        reportsQuerySnapshot.forEach(async (doc) => {
+            const fileData = doc.data();
+            if (fileData.fileName === fileName) { // Use consistent variable name
+                await deleteDoc(doc.ref); // Firestore에서 해당 파일에 대한 신고 기록 삭제
+            }
+        });
+
+        // Firestore에서 파일 업로드 기록 삭제
+        const uploadsCollection = collection(db, 'uploads'); // Check if the collection name is correct
+        const uploadsQuerySnapshot = await getDocs(uploadsCollection);
+        uploadsQuerySnapshot.forEach(async (doc) => {
+            const fileData = doc.data();
+            if (fileData.fileName === fileName) { // Use consistent variable name
+                await deleteDoc(doc.ref); // Firestore에서 해당 파일에 대한 업로드 기록 삭제
+            }
+        });
+
+        // Firestore에서 파일 기록 삭제
+        const filesCollection = collection(db, 'files');
+        const filesQuerySnapshot = await getDocs(filesCollection);
+        filesQuerySnapshot.forEach(async (doc) => {
+            const fileData = doc.data();
+            if (fileData.name === fileName) { // Use consistent variable name
+                await deleteDoc(doc.ref); // Firestore에서 해당 파일에 대한 파일 기록 삭제
+            }
+        });
+
+        // 삭제 성공 메시지 표시 및 파일 목록 다시 로드
+        alert('파일과 관련 기록이 삭제되었습니다.');
+        updateFileList(); // Use the correct function name to update the file list
+    } catch (error) {
+        // 파일 삭제 중 오류가 발생한 경우
+        console.error('파일 삭제 중 오류 발생:', error);
+        alert('파일 삭제 중 오류가 발생했습니다.');
+    }
+}
+
+
+        // 페이지 로드 시 파일 신고 목록 조회
+        window.onload = loadReportedFiles;
+    </script>
+</body>
+</html>
