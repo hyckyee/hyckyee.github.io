@@ -212,30 +212,59 @@
                 postsList.appendChild(li);
             });
         });
-        // 페이지 이동을 처리하는 함수를 작성합니다.
-        function navigateTohome() {
-            // 여기에서 페이지 이동 로직을 추가합니다.
-            window.location.href = "index.html";
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+    // "홈으로" 링크에 이벤트 리스너 추가
+    document.querySelector('a[href="index.html"]').addEventListener('click', function(event) {
+        event.preventDefault(); // 기본 동작(링크 클릭) 방지
+        navigateTohome(); // 홈으로 이동하는 함수 호출
+    });
 
-        function navigateTomeal() {
-            // 여기에서 페이지 이동 로직을 추가합니다.
-            window.location.href = "Dailybj_meal.html";
-        }
+    // "식단표" 링크에 이벤트 리스너 추가
+    document.querySelector('a[href="Dailybj_meal.html"]').addEventListener('click', function(event) {
+        event.preventDefault();
+        navigateTomeal(); // 식단표 페이지로 이동하는 함수 호출
+    });
 
-        function navigateTotimetable() {
-            // 여기에서 페이지 이동 로직을 추가합니다.
-            window.location.href = "Dailybj_timetable.html";
-        }
+    // "시간표" 링크에 이벤트 리스너 추가
+    document.querySelector('a[href="Dailybj_timetable.html"]').addEventListener('click', function(event) {
+        event.preventDefault();
+        navigateTotimetable(); // 시간표 페이지로 이동하는 함수 호출
+    });
 
-        function navigateToCommunity() {
-            // 여기에서 페이지 이동 로직을 추가합니다.
-            window.location.href = "Dailybj_community.html";
-        }
+    // "커뮤니티" 링크에 이벤트 리스너 추가
+    document.querySelector('a[href="Dailybj_community.html"]').addEventListener('click', function(event) {
+        event.preventDefault();
+        navigateToCommunity(); // 커뮤니티 페이지로 이동하는 함수 호출
+    });
 
-        function navigateTofileshare() {
-            // 여기에서 페이지 이동 로직을 추가합니다.
-            window.location.href = "Dailybj_fileshare.html";
+    // "파일 공유" 링크에 이벤트 리스너 추가
+    document.querySelector('a[href="Dailybj_fileshare.html"]').addEventListener('click', function(event) {
+        event.preventDefault();
+        navigateTofileshare(); // 파일 공유 페이지로 이동하는 함수 호출
+    });
+});
+
+// 페이지 이동을 처리하는 함수들 정의
+function navigateTohome() {
+    window.location.href = "index.html";
+}
+
+function navigateTomeal() {
+    window.location.href = "Dailybj_meal.html";
+}
+
+function navigateTotimetable() {
+    window.location.href = "Dailybj_timetable.html";
+}
+
+function navigateToCommunity() {
+    window.location.href = "Dailybj_community.html";
+}
+
+function navigateTofileshare() {
+    window.location.href = "Dailybj_fileshare.html";
+}
+
         }
     </script>
 </body>
