@@ -51,6 +51,11 @@
         .delete-button:hover {
             background-color: #d32f2f;
         }
+        .preview {
+            max-width: 100px;
+            max-height: 100px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -112,6 +117,15 @@
                     <a href="#" class="delete-button" data-file-id="${fileId}">삭제</a>
                 `;
 
+                // 파일 미리보기 생성
+                if (fileName.match(/\.(jpg|jpeg|png|gif)$/)) {
+                    const previewImage = document.createElement('img');
+                    previewImage.src = downloadURL;
+                    previewImage.alt = '파일 미리보기';
+                    previewImage.classList.add('preview');
+                    listItem.appendChild(previewImage);
+                }
+
                 // 삭제 버튼 클릭 이벤트 핸들러 추가
                 const deleteButton = listItem.querySelector('.delete-button');
                 deleteButton.addEventListener('click', () => deleteReportedFileByPath(fileName));
@@ -121,82 +135,80 @@
             });
         }
 
-    // 파일 삭제
-async function deleteReportedFileByPath(filePath) {
-    try {
-        // 파일 존재 여부 확인
-        const fileRef = ref(storage, `files/${filePath}`);
-        const url = await getDownloadURL(fileRef); // 파일의 다운로드 URL 가져오기 시도
+        // 파일 삭제
+        async function deleteReportedFileByPath(filePath) {
+            try {
+                // 파일 존재 여부 확인
+                const fileRef = ref(storage, `files/${filePath}`);
+                const url = await getDownloadURL(fileRef); // 파일의 다운로드 URL 가져오기 시도
 
-        // 파일이 존재하면 삭제 진행
-        if (url) {
-            await deleteObject(fileRef);
+                // 파일이 존재하면 삭제 진행
+                if (url) {
+                    await deleteObject(fileRef);
 
-            // 파일이 성공적으로 삭제되면 Firestore에서 파일 신고 기록 삭제
-            const querySnapshot = await getDocs(collection(db, 'reports'));
-            querySnapshot.forEach(async (doc) => {
-                const fileData = doc.data();
-                if (fileData.fileName === filePath) {
-                    await deleteDoc(doc.ref);
+                    // 파일이 성공적으로 삭제되면 Firestore에서 파일 신고 기록 삭제
+                    const querySnapshot = await getDocs(collection(db, 'reports'));
+                    querySnapshot.forEach(async (doc) => {
+                        const fileData = doc.data();
+                        if (fileData.fileName === filePath) {
+                            await deleteDoc(doc.ref);
+                        }
+                    });
+
+                    // 파일 삭제 시 Firestore에서 파일 및 업로드 기록 삭제
+                    await deleteFileAndRecords(filePath);
+                } else {
+                    throw new Error('파일이 존재하지 않습니다.');
                 }
-            });
-
-            // 파일 삭제 시 Firestore에서 파일 및 업로드 기록 삭제
-            await deleteFileAndRecords(filePath);
-        } else {
-            throw new Error('파일이 존재하지 않습니다.');
+            } catch (error) {
+                // 파일이 존재하지 않거나 삭제 중 오류가 발생한 경우
+                console.error('파일 삭제 중 오류 발생:', error);
+                alert('파일 삭제 중 오류가 발생했습니다.');
+            }
         }
-    } catch (error) {
-        // 파일이 존재하지 않거나 삭제 중 오류가 발생한 경우
-        console.error('파일 삭제 중 오류 발생:', error);
-        alert('파일 삭제 중 오류가 발생했습니다.');
-    }
-}
-
 
         // 파일 및 업로드 기록 삭제
-async function deleteFileAndRecords(fileName) {
-    try {
-        // Firestore에서 파일 신고 기록 삭제
-        const reportsCollection = collection(db, 'reports');
-        const reportsQuerySnapshot = await getDocs(reportsCollection);
-        reportsQuerySnapshot.forEach(async (doc) => {
-            const fileData = doc.data();
-            if (fileData.fileName === fileName) { // Use consistent variable name
-                await deleteDoc(doc.ref); // Firestore에서 해당 파일에 대한 신고 기록 삭제
+        async function deleteFileAndRecords(fileName) {
+            try {
+                // Firestore에서 파일 신고 기록 삭제
+                const reportsCollection = collection(db, 'reports');
+                const reportsQuerySnapshot = await getDocs(reportsCollection);
+                reportsQuerySnapshot.forEach(async (doc) => {
+                    const fileData = doc.data();
+                    if (fileData.fileName === fileName) { // Use consistent variable name
+                        await deleteDoc(doc.ref); // Firestore에서 해당 파일에 대한 신고 기록 삭제
+                    }
+                });
+
+                // Firestore에서 파일 업로드 기록 삭제
+                const uploadsCollection = collection(db, 'uploads'); // Check if the collection name is correct
+                const uploadsQuerySnapshot = await getDocs(uploadsCollection);
+                uploadsQuerySnapshot.forEach(async (doc) => {
+                    const fileData = doc.data();
+                    if (fileData.fileName === fileName) { // Use consistent variable name
+                        await deleteDoc(doc.ref); // Firestore에서 해당 파일에 대한 업로드 기록 삭제
+                    }
+                });
+
+                // Firestore에서 파일 기록 삭제
+                const filesCollection = collection(db, 'files');
+                const filesQuerySnapshot = await getDocs(filesCollection);
+                filesQuerySnapshot.forEach(async (doc) => {
+                    const fileData = doc.data();
+                    if (fileData.name === fileName) { // Use consistent variable name
+                        await deleteDoc(doc.ref); // Firestore에서 해당 파일에 대한 파일 기록 삭제
+                    }
+                });
+
+                // 삭제 성공 메시지 표시 및 파일 목록 다시 로드
+                alert('파일과 관련 기록이 삭제되었습니다.');
+                loadReportedFiles(); // Use the correct function name to update the file list
+            } catch (error) {
+                // 파일 삭제 중 오류가 발생한 경우
+                console.error('파일 삭제 중 오류 발생:', error);
+                alert('파일 삭제 중 오류가 발생했습니다.');
             }
-        });
-
-        // Firestore에서 파일 업로드 기록 삭제
-        const uploadsCollection = collection(db, 'uploads'); // Check if the collection name is correct
-        const uploadsQuerySnapshot = await getDocs(uploadsCollection);
-        uploadsQuerySnapshot.forEach(async (doc) => {
-            const fileData = doc.data();
-            if (fileData.fileName === fileName) { // Use consistent variable name
-                await deleteDoc(doc.ref); // Firestore에서 해당 파일에 대한 업로드 기록 삭제
-            }
-        });
-
-        // Firestore에서 파일 기록 삭제
-        const filesCollection = collection(db, 'files');
-        const filesQuerySnapshot = await getDocs(filesCollection);
-        filesQuerySnapshot.forEach(async (doc) => {
-            const fileData = doc.data();
-            if (fileData.name === fileName) { // Use consistent variable name
-                await deleteDoc(doc.ref); // Firestore에서 해당 파일에 대한 파일 기록 삭제
-            }
-        });
-
-        // 삭제 성공 메시지 표시 및 파일 목록 다시 로드
-        alert('파일과 관련 기록이 삭제되었습니다.');
-        updateFileList(); // Use the correct function name to update the file list
-    } catch (error) {
-        // 파일 삭제 중 오류가 발생한 경우
-        console.error('파일 삭제 중 오류 발생:', error);
-        alert('파일 삭제 중 오류가 발생했습니다.');
-    }
-}
-
+        }
 
         // 페이지 로드 시 파일 신고 목록 조회
         window.onload = loadReportedFiles;

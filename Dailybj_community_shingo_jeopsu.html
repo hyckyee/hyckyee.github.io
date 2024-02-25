@@ -66,7 +66,7 @@
     <!-- Firebase SDK 로드 -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js';
-        import { getDatabase, ref, onValue, remove } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js';
+        import { getDatabase, ref, onValue, remove, get } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js';
 
         // Firebase 구성 정보
         const firebaseConfig = {
@@ -107,6 +107,7 @@
                     <div class="item-info">댓글 ID: ${commentId}</div>
                     <button class="delete-button" data-report-id="${reportId}" data-post-id="${reportData.postId}" data-comment-id="${reportData.commentId}">삭제</button>
                     <button class="reject-button" data-report-id="${reportId}" data-post-id="${reportData.postId}" data-comment-id="${reportData.commentId}">반려</button>
+                    <div class="original-content" id="originalContent_${reportId}"></div>
                 `;
 
                 // 삭제 버튼 클릭 이벤트 핸들러 추가
@@ -129,6 +130,9 @@
 
                 // 목록에 아이템 추가
                 reportedItemsList.appendChild(listItem);
+
+                // 원본 글 및 댓글 표시
+                displayOriginalContent(reportId, reportData.postId, commentId);
             });
         });
 
@@ -144,25 +148,26 @@
                     alert('항목 삭제 중 오류가 발생했습니다.');
                 });
 
-            // 'posts'에서 해당 게시물 삭제
-            if (postId) {
-                remove(ref(db, `posts/${postId}`))
-                    .then(() => {
-                        console.log('게시물이 삭제되었습니다.');
-                    })
-                    .catch((error) => {
-                        console.error('게시물 삭제 중 오류 발생:', error);
-                    });
-            }
-
-            // 'comments'에서 해당 댓글 삭제
-            if (commentId) {
+            // 댓글 삭제
+            if (commentId && commentId !== '없음') {
                 remove(ref(db, `comments/${postId}/${commentId}`))
                     .then(() => {
                         console.log('댓글이 삭제되었습니다.');
                     })
                     .catch((error) => {
                         console.error('댓글 삭제 중 오류 발생:', error);
+                    });
+            }
+        
+
+         // 댓글 삭제
+         if (commentId && commentId !== '없음') {
+                remove(ref(db, `posts/${postId}`))
+                    .then(() => {
+                        console.log('글이 삭제되었습니다.');
+                    })
+                    .catch((error) => {
+                        console.error('글 삭제 중 오류 발생:', error);
                     });
             }
         }
@@ -178,6 +183,41 @@
                     console.error('신고 반려 중 오류 발생:', error);
                     alert('신고 반려 중 오류가 발생했습니다.');
                 });
+        }
+
+        // 원본 글 및 댓글 표시 함수
+        function displayOriginalContent(reportId, postId, commentId) {
+            const originalContentContainer = document.getElementById(`originalContent_${reportId}`);
+            if (postId && postId !== '없음') {
+                // 게시물 표시
+                get(ref(db, `posts/${postId}`))
+                    .then((snapshot) => {
+                        const postData = snapshot.val();
+                        if (postData) {
+                            originalContentContainer.innerHTML = `<div><strong>원본 글 내용:</strong> ${postData.content}</div>`;
+                        } else {
+                            originalContentContainer.innerHTML = `<div>원본 글이 존재하지 않습니다.</div>`;
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('원본 글 데이터를 불러오는 중 오류 발생:', error);
+                    });
+            }
+            if (commentId && commentId !== '없음') {
+                // 댓글 표시
+                get(ref(db, `comments/${postId}/${commentId}`))
+                    .then((snapshot) => {
+                        const commentData = snapshot.val();
+                        if (commentData) {
+                            originalContentContainer.innerHTML = `<div><strong>원본 댓글 내용:</strong> ${commentData.content}</div>`;
+                        } else {
+                            originalContentContainer.innerHTML = `<div>원본 댓글이 존재하지 않습니다.</div>`;
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('원본 댓글 데이터를 불러오는 중 오류 발생:', error);
+                    });
+            }
         }
     </script>
 </body>
