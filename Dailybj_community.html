@@ -81,15 +81,14 @@
         import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/9.6.2/firebase-database.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyCYBpnsvR8DpS8VxsVEFp7rahCJx4YWu4c",
-            authDomain: "byeongjeomstory.firebaseapp.com",
-            databaseURL: "https://byeongjeomstory-default-rtdb.firebaseio.com",
-            projectId: "byeongjeomstory",
-            storageBucket: "byeongjeomstory.appspot.com",
-            messagingSenderId: "413439246892",
-            appId: "1:413439246892:web:abcd1e13e6d445c4670789",
-            measurementId: "G-VMVXF8JGZS"
-        };
+  apiKey: "AIzaSyCYBpnsvR8DpS8VxsVEFp7rahCJx4YWu4c",
+  authDomain: "byeongjeomstory.firebaseapp.com",
+  databaseURL: "https://byeongjeomstory-default-rtdb.firebaseio.com",
+  projectId: "byeongjeomstory",
+  storageBucket: "byeongjeomstory.appspot.com",
+  messagingSenderId: "413439246892",
+  appId: "1:413439246892:web:abcd1e13e6d445c4670789",
+  measurementId: "G-VMVXF8JGZS"
 
         // Firebase 앱 초기화
         const app = initializeApp(firebaseConfig);
@@ -97,7 +96,7 @@
         // Firebase 데이터베이스 참조
         const db = getDatabase();
         const postsRef = ref(db, 'posts');
-        
+
         // 게시물 및 댓글 신고 버튼 클릭 이벤트 처리
         document.addEventListener('click', function(event) {
             if (event.target.classList.contains('reportPost')) {
