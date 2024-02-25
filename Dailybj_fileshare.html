@@ -69,6 +69,11 @@
             border-radius: 5px;
             cursor: pointer;
         }
+        .preview {
+            max-width: 300px;
+            max-height: 300px;
+            margin-right: 10px; /* 이미지와 파일명 사이 간격 조절 */
+        }
     </style>
 </head>
 <body>
@@ -87,23 +92,24 @@
         <label for="fileInput" id="uploadLabel">파일 선택</label>
         <input type="file" id="fileInput" style="display: none;">
         <ul id="fileList"></ul>
+        <div id="imagePreview"></div>
     </div>
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.4/firebase-app.js';
         import { getFirestore, serverTimestamp, collection, addDoc, getDocs, orderBy, query } from 'https://www.gstatic.com/firebasejs/9.6.4/firebase-firestore.js';
-        import { getStorage, ref, uploadBytes } from 'https://www.gstatic.com/firebasejs/9.6.4/firebase-storage.js';
+        import { getStorage, ref, uploadBytes, listAll, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.6.4/firebase-storage.js';
 
         document.addEventListener('DOMContentLoaded', async function() {
             const firebaseConfig = {
                 apiKey: "AIzaSyCYBpnsvR8DpS8VxsVEFp7rahCJx4YWu4c",
-            authDomain: "byeongjeomstory.firebaseapp.com",
-            databaseURL: "https://byeongjeomstory-default-rtdb.firebaseio.com",
-            projectId: "byeongjeomstory",
-            storageBucket: "byeongjeomstory.appspot.com",
-            messagingSenderId: "413439246892",
-            appId: "1:413439246892:web:abcd1e13e6d445c4670789",
-            measurementId: "G-VMVXF8JGZS"
+                authDomain: "byeongjeomstory.firebaseapp.com",
+                databaseURL: "https://byeongjeomstory-default-rtdb.firebaseio.com",
+                projectId: "byeongjeomstory",
+                storageBucket: "byeongjeomstory.appspot.com",
+                messagingSenderId: "413439246892",
+                appId: "1:413439246892:web:abcd1e13e6d445c4670789",
+                measurementId: "G-VMVXF8JGZS",
             };
 
             const app = initializeApp(firebaseConfig);
@@ -112,23 +118,38 @@
 
             const fileInput = document.getElementById('fileInput');
             const fileListContainer = document.getElementById('fileList');
+            const imagePreview = document.getElementById('imagePreview');
 
             // 파일 목록 업데이트 함수
             async function updateFileList() {
                 fileListContainer.innerHTML = ''; // 이전 목록 제거
                 const q = query(collection(db, "files"), orderBy('timestamp', 'desc')); // 최신순으로 정렬된 쿼리
                 const querySnapshot = await getDocs(q);
-                querySnapshot.forEach((doc) => {
+                querySnapshot.forEach(async (doc) => {
                     const fileData = doc.data();
                     const fileName = fileData.name;
                     const fileSize = fileData.size;
                     const downloadURL = `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/files%2F${encodeURIComponent(fileName)}?alt=media`;
                     const listItem = document.createElement('li');
+
+                    // 이미지 파일인 경우 미리보기 생성
+                    if (fileName.match(/\.(jpg|jpeg|png|gif)$/)) {
+                        const imageURL = await getDownloadURL(ref(storage, `files/${fileName}`));
+                        const img = document.createElement('img');
+                        img.src = imageURL;
+                        img.alt = '이미지 미리보기';
+                        img.classList.add('preview');
+                        listItem.appendChild(img);
+
+                        // 줄바꿈 추가
+                        listItem.appendChild(document.createElement('br'));
+                    }
+
                     const link = document.createElement('a');
                     link.href = downloadURL;
                     link.textContent = `${fileName} (${fileSize} bytes)`;
                     listItem.appendChild(link);
-                    
+
                     // "신고" 버튼 추가
                     const reportButton = document.createElement('button');
                     reportButton.textContent = '신고';
@@ -136,7 +157,7 @@
                         reportFile(fileName);
                     });
                     listItem.appendChild(reportButton);
-                    
+
                     fileListContainer.appendChild(listItem);
                 });
             }
