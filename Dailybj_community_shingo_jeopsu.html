@@ -40,15 +40,16 @@
             font-weight: bold;
             margin-bottom: 5px;
         }
-        .delete-button {
+        .delete-button, .reject-button {
             background-color: #f44336;
             color: white;
             border: none;
             border-radius: 5px;
             padding: 5px 10px;
             cursor: pointer;
+            margin-right: 10px;
         }
-        .delete-button:hover {
+        .delete-button:hover, .reject-button:hover {
             background-color: #d32f2f;
         }
     </style>
@@ -86,77 +87,98 @@
         const db = getDatabase(app);
         const reportsRef = ref(db, 'reports');
 
-       // 페이지 로드 시 신고된 항목 목록 조회
-onValue(reportsRef, (snapshot) => {
-    const reportedItemsList = document.getElementById('reportedItemsList');
-    reportedItemsList.innerHTML = ''; // 이전 목록 초기화
+        // 페이지 로드 시 신고된 항목 목록 조회
+        onValue(reportsRef, (snapshot) => {
+            const reportedItemsList = document.getElementById('reportedItemsList');
+            reportedItemsList.innerHTML = ''; // 이전 목록 초기화
 
-    snapshot.forEach((childSnapshot) => {
-        const reportId = childSnapshot.key; // 신고 ID
-        const reportData = childSnapshot.val(); // 신고 데이터
+            snapshot.forEach((childSnapshot) => {
+                const reportId = childSnapshot.key; // 신고 ID
+                const reportData = childSnapshot.val(); // 신고 데이터
 
-        // 댓글 ID가 존재하는지 확인하고 없으면 '없음'으로 설정
-        const commentId = reportData.commentId ? reportData.commentId : '없음';
+                // 댓글 ID가 존재하는지 확인하고 없으면 '없음'으로 설정
+                const commentId = reportData.commentId ? reportData.commentId : '없음';
 
-        // 리스트 아이템 생성
-        const listItem = document.createElement('li');
-        listItem.innerHTML = `
-            <div class="item-info">신고 ID: ${reportId}</div>
-            <div class="item-info">게시물 ID: ${reportData.postId}</div>
-            <div class="item-info">댓글 ID: ${commentId}</div>
-            <button class="delete-button" data-report-id="${reportId}" data-post-id="${reportData.postId}" data-comment-id="${reportData.commentId}">삭제</button>
-        `;
+                // 리스트 아이템 생성
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <div class="item-info">신고 ID: ${reportId}</div>
+                    <div class="item-info">게시물 ID: ${reportData.postId}</div>
+                    <div class="item-info">댓글 ID: ${commentId}</div>
+                    <button class="delete-button" data-report-id="${reportId}" data-post-id="${reportData.postId}" data-comment-id="${reportData.commentId}">삭제</button>
+                    <button class="reject-button" data-report-id="${reportId}" data-post-id="${reportData.postId}" data-comment-id="${reportData.commentId}">반려</button>
+                `;
 
-        // 삭제 버튼 클릭 이벤트 핸들러 추가
-        const deleteButton = listItem.querySelector('.delete-button');
-        deleteButton.addEventListener('click', () => {
-            console.log('delete button clicked');
-            const postId = deleteButton.getAttribute('data-post-id');
-            const commentId = deleteButton.getAttribute('data-comment-id');
-            deleteReportedItem(reportId, postId, commentId);
+                // 삭제 버튼 클릭 이벤트 핸들러 추가
+                const deleteButton = listItem.querySelector('.delete-button');
+                deleteButton.addEventListener('click', () => {
+                    console.log('delete button clicked');
+                    const postId = deleteButton.getAttribute('data-post-id');
+                    const commentId = deleteButton.getAttribute('data-comment-id');
+                    deleteReportedItem(reportId, postId, commentId);
+                });
+
+                // 반려 버튼 클릭 이벤트 핸들러 추가
+                const rejectButton = listItem.querySelector('.reject-button');
+                rejectButton.addEventListener('click', () => {
+                    console.log('reject button clicked');
+                    const postId = rejectButton.getAttribute('data-post-id');
+                    const commentId = rejectButton.getAttribute('data-comment-id');
+                    rejectReport(reportId, postId, commentId);
+                });
+
+                // 목록에 아이템 추가
+                reportedItemsList.appendChild(listItem);
+            });
         });
 
-        // 목록에 아이템 추가
-        reportedItemsList.appendChild(listItem);
-    });
-});
+        // 신고된 항목 삭제 함수
+        function deleteReportedItem(reportId, postId, commentId) {
+            // 'reports'에서 삭제
+            remove(ref(db, `reports/${reportId}`))
+                .then(() => {
+                    alert('신고된 항목이 삭제되었습니다.');
+                })
+                .catch((error) => {
+                    console.error('항목 삭제 중 오류 발생:', error);
+                    alert('항목 삭제 중 오류가 발생했습니다.');
+                });
 
+            // 'posts'에서 해당 게시물 삭제
+            if (postId) {
+                remove(ref(db, `posts/${postId}`))
+                    .then(() => {
+                        console.log('게시물이 삭제되었습니다.');
+                    })
+                    .catch((error) => {
+                        console.error('게시물 삭제 중 오류 발생:', error);
+                    });
+            }
 
-       // 신고된 항목 삭제 함수
-function deleteReportedItem(reportId, postId, commentId) {
-    // 'reports'에서 삭제
-    remove(ref(db, `reports/${reportId}`))
-        .then(() => {
-            alert('신고된 항목이 삭제되었습니다.');
-        })
-        .catch((error) => {
-            console.error('항목 삭제 중 오류 발생:', error);
-            alert('항목 삭제 중 오류가 발생했습니다.');
-        });
+            // 'comments'에서 해당 댓글 삭제
+            if (commentId) {
+                remove(ref(db, `comments/${postId}/${commentId}`))
+                    .then(() => {
+                        console.log('댓글이 삭제되었습니다.');
+                    })
+                    .catch((error) => {
+                        console.error('댓글 삭제 중 오류 발생:', error);
+                    });
+            }
+        }
 
-    // 'posts'에서 해당 게시물 삭제
-    if (postId) {
-        remove(ref(db, `posts/${postId}`))
-            .then(() => {
-                console.log('게시물이 삭제되었습니다.');
-            })
-            .catch((error) => {
-                console.error('게시물 삭제 중 오류 발생:', error);
-            });
-    }
-
-    // 'comments'에서 해당 댓글 삭제
-    if (commentId) {
-        remove(ref(db, `comments/${postId}/${commentId}`))
-            .then(() => {
-                console.log('댓글이 삭제되었습니다.');
-            })
-            .catch((error) => {
-                console.error('댓글 삭제 중 오류 발생:', error);
-            });
-    }
-}
-
+        // 신고 반려 함수
+        function rejectReport(reportId, postId, commentId) {
+            // 'reports'에서 삭제
+            remove(ref(db, `reports/${reportId}`))
+                .then(() => {
+                    alert('신고가 반려되었습니다.');
+                })
+                .catch((error) => {
+                    console.error('신고 반려 중 오류 발생:', error);
+                    alert('신고 반려 중 오류가 발생했습니다.');
+                });
+        }
     </script>
 </body>
 </html>
