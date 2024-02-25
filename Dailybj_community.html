@@ -74,29 +74,29 @@
         </form>
         <ul id="posts"></ul>
     </main>
-
     <script type="module">
         // Firebase 구성 정보
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.2/firebase-app.js";
         import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/9.6.2/firebase-database.js";
-
+    
         const firebaseConfig = {
-  apiKey: "AIzaSyCYBpnsvR8DpS8VxsVEFp7rahCJx4YWu4c",
-  authDomain: "byeongjeomstory.firebaseapp.com",
-  databaseURL: "https://byeongjeomstory-default-rtdb.firebaseio.com",
-  projectId: "byeongjeomstory",
-  storageBucket: "byeongjeomstory.appspot.com",
-  messagingSenderId: "413439246892",
-  appId: "1:413439246892:web:abcd1e13e6d445c4670789",
-  measurementId: "G-VMVXF8JGZS"
-
+            apiKey: "AIzaSyCYBpnsvR8DpS8VxsVEFp7rahCJx4YWu4c",
+            authDomain: "byeongjeomstory.firebaseapp.com",
+            databaseURL: "https://byeongjeomstory-default-rtdb.firebaseio.com",
+            projectId: "byeongjeomstory",
+            storageBucket: "byeongjeomstory.appspot.com",
+            messagingSenderId: "413439246892",
+            appId: "1:413439246892:web:abcd1e13e6d445c4670789",
+            measurementId: "G-VMVXF8JGZS"
+        }; // Add a closing bracket here
+    
         // Firebase 앱 초기화
         const app = initializeApp(firebaseConfig);
-
+    
         // Firebase 데이터베이스 참조
         const db = getDatabase();
         const postsRef = ref(db, 'posts');
-
+    
         // 게시물 및 댓글 신고 버튼 클릭 이벤트 처리
         document.addEventListener('click', function(event) {
             if (event.target.classList.contains('reportPost')) {
@@ -125,7 +125,7 @@
                 alert('댓글이 신고되었습니다.');
             }
         });
-
+    
         // 글 작성 폼 이벤트 리스너
         document.getElementById('postForm').addEventListener('submit', function(event) {
             event.preventDefault();
@@ -140,7 +140,7 @@
                 document.getElementById('postContent').value = '';
             }
         });
-
+    
         // 댓글 추가 함수
         function addComment(postId, commentContent) {
             const commentData = {
@@ -150,7 +150,7 @@
             const postCommentsRef = ref(db, `comments/${postId}`); // 경로 수정
             push(postCommentsRef, commentData);
         }
-
+    
         // 글 및 댓글 렌더링
         const postsList = document.getElementById('posts');
         onValue(postsRef, (snapshot) => {
@@ -161,14 +161,14 @@
                 const li = document.createElement('li');
                 li.className = 'post';
                 li.innerHTML = `내용: ${post.content} - 작성 시간: <span class="timestamp">${post.timestamp}</span>`;
-
+    
                 // 신고 버튼 추가
                 const reportButton = document.createElement('button');
                 reportButton.textContent = '게시물 신고';
                 reportButton.classList.add('reportPost');
                 reportButton.dataset.postId = postKey;
                 li.appendChild(reportButton);
-
+    
                 // 댓글 입력란 및 버튼 추가
                 const commentContainer = document.createElement('div');
                 const commentTextarea = document.createElement('textarea');
@@ -187,7 +187,7 @@
                 };
                 commentContainer.appendChild(commentButton);
                 li.appendChild(commentContainer);
-
+    
                 // 댓글 렌더링
                 const commentsRefPath = ref(db, `comments/${postKey}`); // 수정된 부분
                 onValue(commentsRefPath, (commentsSnapshot) => { // 수정된 부분
@@ -197,7 +197,7 @@
                         commentItem.className = 'comment'; // 댓글 요소에 클래스를 추가합니다.
                         commentItem.textContent = `댓글: ${comment.content} - 작성 시간: ${comment.timestamp}`;
                         li.appendChild(commentItem);
-
+    
                         // 댓글 신고 버튼 추가
                         const reportCommentButton = document.createElement('button');
                         reportCommentButton.textContent = '댓글 신고';
@@ -207,10 +207,11 @@
                         li.appendChild(reportCommentButton);
                     });
                 });
-
+    
                 postsList.appendChild(li);
             });
         });
     </script>
+    
 </body>
 </html>
