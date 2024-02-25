@@ -78,6 +78,8 @@
             <button type="button" class="btn btn-primary" onclick="navigateToHome()">홈으로 이동</button>
             <button type="button" class="btn btn-primary" onclick="navigateToMeal()">급식 페이지로 이동</button>
             <button type="button" class="btn btn-primary" onclick="navigateToTimetable()">시간표 페이지로 이동</button>
+            <button type="button" class="btn btn-primary" onclick="navigateToCommunity()">커뮤니티 페이지로 이동</button>
+            <button type="button" class="btn btn-primary" onclick="navigateToFileShare()">파일공유서비스 페이지로 이동</button>
         </div>
     </div>
 
@@ -178,6 +180,17 @@ async function displayTimetable(grade, classCode, date) {
         function navigateToTimetable() {
             window.location.href = "Dailybj_timetable.html";
         }
+
+        // Function to navigate to community page
+        function navigateToCommunity() {
+            window.location.href = "Dailybj_community.html";
+        }
+
+        // Function to navigate to file share page
+        function navigateToFileShare() {
+            window.location.href = "Dailybj_fileshare.html";
+        }
+
         // Function to handle date selection change
 document.getElementById('dateInput').addEventListener('change', function() {
     const selectedDate = this.value.replaceAll('-', ''); // Get selected date from the input and remove '-' characters

@@ -4,80 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>병점스토리 커뮤니티</title>
-    <!-- Firebase SDK 버전 9를 사용하는 CDN 링크 -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.2/firebase-app.js" type="module"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.2/firebase-database.js" type="module"></script>
+    <!-- Bootstrap CSS 링크 추가 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* CSS 스타일을 추가합니다. */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            background-color: #333;
-            color: #fff;
-            padding: 10px;
-            text-align: center;
-            position: relative; /* 버튼을 상대적으로 위치시키기 위해 */
-        }
-        header a {
-            color: #fff;
-            text-decoration: none;
-            margin-right: 10px; /* 버튼 사이의 간격을 추가 */
-        }
-        main {
-            padding: 20px;
-        }
-        #postForm {
-            margin-bottom: 20px;
-        }
-        #posts {
-            list-style-type: none;
-            padding: 0;
-        }
-        .post {
-            background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin-bottom: 10px;
-        }
         .comment {
             margin-left: 20px;
             border-left: 2px solid #ccc;
             padding-left: 10px;
-            margin-top: 10px; /* 각 댓글 사이의 간격 조정 */
+            margin-top: 10px;
         }
-        /* 작성 시간 스타일 조정 */
         .timestamp {
-            font-size: 0.8em; /* 작은 크기로 조절 */
-            font-style: italic; /* 기울임꼴로 변경 */
+            font-size: 0.8em;
+            font-style: italic;
+        }
+        /* 글마다 테두리 추가 */
+        .post {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>병점스토리 커뮤니티</h1>
-        <div>
-            <!-- 다른 페이지로 이동하는 링크 추가 -->
-            <a href="index.html">홈으로</a>
-            <a href="Dailybj_meal.html">식단표</a>
-            <a href="Dailybj_timetable.html">시간표</a>
+    <header class="bg-dark py-3">
+        <div class="container">
+            <h1 class="text-white mb-0">병점스토리 커뮤니티</h1>
+            <nav>
+                <a href="index.html" class="text-white">홈으로</a>
+                <a href="Dailybj_meal.html" class="text-white">식단표</a>
+                <a href="Dailybj_timetable.html" class="text-white">시간표</a>
+                <a href="Dailybj_fileshare.html" class="text-white">파일 공유</a> <!-- 파일 공유 사이트로 이동하는 링크 추가 -->
+            </nav>
         </div>
     </header>
-    <main>
-        <form id="postForm">
-            <textarea id="postContent" placeholder="내용을 입력하세요..." rows="4" cols="50"></textarea><br>
-            <button type="submit">게시</button>
+    <main class="container mt-4">
+        <form id="postForm" class="mb-4">
+            <div class="mb-3">
+                <textarea id="postContent" class="form-control" placeholder="내용을 입력하세요..." rows="4"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">게시</button>
         </form>
-        <ul id="posts"></ul>
+        <ul id="posts" class="list-unstyled"></ul>
     </main>
+    <!-- Bootstrap JS 링크 추가 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Firebase SDK 및 자바스크립트 코드 -->
     <script type="module">
-        // Firebase 구성 정보
+        // Firebase SDK 버전 9를 사용하는 CDN 링크
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.2/firebase-app.js";
-        import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/9.6.2/firebase-database.js";
+        import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/9.6.2/firebase-database.js";
     
         const firebaseConfig = {
             apiKey: "AIzaSyCYBpnsvR8DpS8VxsVEFp7rahCJx4YWu4c",
@@ -88,7 +64,7 @@
             messagingSenderId: "413439246892",
             appId: "1:413439246892:web:abcd1e13e6d445c4670789",
             measurementId: "G-VMVXF8JGZS"
-        }; // Add a closing bracket here
+        };
     
         // Firebase 앱 초기화
         const app = initializeApp(firebaseConfig);
@@ -102,7 +78,7 @@
             if (event.target.classList.contains('reportPost')) {
                 const postId = event.target.dataset.postId;
                 const reportData = {
-                    type: 'post', // 게시물인지 댓글인지 구분하기 위한 타입
+                    type: 'post',
                     postId: postId,
                     timestamp: new Date().toLocaleString()
                 };
@@ -114,7 +90,7 @@
                 const postId = event.target.dataset.postId;
                 const commentId = event.target.dataset.commentId;
                 const reportData = {
-                    type: 'comment', // 게시물인지 댓글인지 구분하기 위한 타입
+                    type: 'comment',
                     postId: postId,
                     commentId: commentId,
                     timestamp: new Date().toLocaleString()
@@ -135,8 +111,8 @@
                     content: postContent,
                     timestamp: new Date().toLocaleString()
                 };
-                const newPostRef = push(postsRef, postData); // 새로운 게시물 추가 후 참조를 반환
-                const postId = newPostRef.key; // 새로운 게시물의 고유 키 가져오기
+                const newPostRef = push(postsRef, postData);
+                const postId = newPostRef.key;
                 document.getElementById('postContent').value = '';
             }
         });
@@ -147,14 +123,14 @@
                 content: commentContent,
                 timestamp: new Date().toLocaleString()
             };
-            const postCommentsRef = ref(db, `comments/${postId}`); // 경로 수정
+            const postCommentsRef = ref(db, `comments/${postId}`);
             push(postCommentsRef, commentData);
         }
     
         // 글 및 댓글 렌더링
         const postsList = document.getElementById('posts');
         onValue(postsRef, (snapshot) => {
-            postsList.innerHTML = ''; // 기존 내용을 모두 지웁니다.
+            postsList.innerHTML = '';
             snapshot.forEach((childSnapshot) => {
                 const post = childSnapshot.val();
                 const postKey = childSnapshot.key;
@@ -165,7 +141,7 @@
                 // 신고 버튼 추가
                 const reportButton = document.createElement('button');
                 reportButton.textContent = '게시물 신고';
-                reportButton.classList.add('reportPost');
+                reportButton.classList.add('reportPost', 'btn', 'btn-sm', 'btn-danger', 'ms-2');
                 reportButton.dataset.postId = postKey;
                 li.appendChild(reportButton);
     
@@ -175,33 +151,35 @@
                 commentTextarea.placeholder = '댓글을 입력하세요...';
                 commentTextarea.rows = 2;
                 commentTextarea.cols = 30;
+                commentTextarea.classList.add('form-control', 'mb-2');
                 commentContainer.appendChild(commentTextarea);
                 const commentButton = document.createElement('button');
                 commentButton.textContent = '댓글 작성';
+                commentButton.classList.add('btn', 'btn-primary', 'btn-sm', 'mb-2');
                 commentButton.onclick = function() {
                     const commentContent = commentTextarea.value;
                     if (commentContent.trim() !== '') {
                         addComment(postKey, commentContent);
-                        commentTextarea.value = ''; // 댓글 입력 필드 초기화
+                        commentTextarea.value = '';
                     }
                 };
                 commentContainer.appendChild(commentButton);
                 li.appendChild(commentContainer);
     
                 // 댓글 렌더링
-                const commentsRefPath = ref(db, `comments/${postKey}`); // 수정된 부분
-                onValue(commentsRefPath, (commentsSnapshot) => { // 수정된 부분
+                const commentsRefPath = ref(db, `comments/${postKey}`);
+                onValue(commentsRefPath, (commentsSnapshot) => {
                     commentsSnapshot.forEach((commentSnapshot) => {
                         const comment = commentSnapshot.val();
                         const commentItem = document.createElement('li');
-                        commentItem.className = 'comment'; // 댓글 요소에 클래스를 추가합니다.
+                        commentItem.className = 'comment';
                         commentItem.textContent = `댓글: ${comment.content} - 작성 시간: ${comment.timestamp}`;
                         li.appendChild(commentItem);
     
                         // 댓글 신고 버튼 추가
                         const reportCommentButton = document.createElement('button');
                         reportCommentButton.textContent = '댓글 신고';
-                        reportCommentButton.classList.add('reportComment');
+                        reportCommentButton.classList.add('reportComment', 'btn', 'btn-sm', 'btn-danger', 'ms-2');
                         reportCommentButton.dataset.postId = postKey;
                         reportCommentButton.dataset.commentId = commentSnapshot.key;
                         li.appendChild(reportCommentButton);
@@ -212,6 +190,5 @@
             });
         });
     </script>
-    
 </body>
 </html>
