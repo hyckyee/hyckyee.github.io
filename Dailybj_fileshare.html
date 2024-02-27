@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>병점스토리 파일공유</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         /* CSS 스타일 */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
-            margin: 20px;
+            color: #333; 
         }
         header {
             background-color: #333;
@@ -18,27 +19,26 @@
             text-align: center;
         }
         nav {
-            background-color: #444;
+            background-color: #333;
+            color: #fff;
             padding: 10px;
             text-align: center;
         }
-        nav a {
-            color: #fff;
-            text-decoration: none;
-            margin: 0 10px;
-        }
-        nav a:hover {
-            text-decoration: underline;
-        }
+    
 
         .container {
             max-width: 600px;
             margin: 0 auto;
-            background-color: #fff;
+            background-color: #333;
+            color: #333; 
             padding: 20px;
             border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
+
+        .container:nth-last-child(2) {
+    background-color: #fff; /* 흰색 배경으로 변경 */
+}
+
         #fileList {
             list-style: none;
             padding: 0;
@@ -83,11 +83,29 @@
     <header>
         <h1>병점스토리 파일공유</h1>
     </header>
-    <nav>
-        <a href="index.html" id="index.html">홈</a>
-        <a href="Dailybj_meal.html" id="Dailybj_meal">급식</a>
-        <a href="Dailybj_timetable.html" id="Dailybj_timetable.html">시간표</a>
-        <a href="Dailybj_community.html" id="Dailybj_community.html">커뮤니티(베타)</a>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
+        <div class="container">
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <!-- 메뉴를 Bootstrap 네비게이션으로 변경 -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="homeLink">홈</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="announcementLink">급식</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="schoolInfoLink">시간표</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="communityLink">커뮤니티(베타)</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="fileshare">파일공유서비스</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </nav>
     <div class="container">
         <h1>병점스토리 파일공유</h1>
@@ -97,6 +115,7 @@
         <ul id="fileList"></ul>
         <div id="imagePreview"></div>
     </div>
+
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.4/firebase-app.js';
@@ -219,6 +238,47 @@
 
             // 파일 목록 업데이트
             updateFileList();
+        });
+                // 페이지 이동을 처리하는 함수를 작성합니다.
+                function navigateTohome() {
+            window.location.href = "index.html";
+        }
+
+        function navigateTomeal() {
+            window.location.href = "Dailybj_meal.html";
+        }
+
+        function navigateTotimetable() {
+            window.location.href = "Dailybj_timetable.html";
+        }
+
+        function navigateToCommunity() {
+            window.location.href = "Dailybj_community.html";
+        }
+
+        function navigateTofileshare() {
+            window.location.href = "Dailybj_fileshare.html";
+        }
+   // 각 메뉴에 이벤트 리스너를 추가하여 페이지 이동을 처리합니다.
+   document.getElementById('homeLink').addEventListener('click', function(event) {
+            event.preventDefault();
+            navigateTohome();
+        });
+        document.getElementById('announcementLink').addEventListener('click', function(event) {
+            event.preventDefault();
+            navigateTomeal();
+        });
+        document.getElementById('schoolInfoLink').addEventListener('click', function(event) {
+            event.preventDefault();
+            navigateTotimetable();
+        });
+        document.getElementById('communityLink').addEventListener('click', function(event) {
+            event.preventDefault();
+            navigateToCommunity();
+        });
+        document.getElementById('fileshare').addEventListener('click', function(event) {
+            event.preventDefault();
+            navigateTofileshare();
         });
     </script>
 </body>

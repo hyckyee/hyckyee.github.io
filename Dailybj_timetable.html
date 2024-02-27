@@ -14,11 +14,6 @@
             padding: 0;
             text-align: center;
         }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
         h1 {
             background-color: #333;
             color: #fff;
@@ -27,26 +22,46 @@
         }
         label {
             font-size: 1.2em;
-            margin-top: 20px;
+          
             display: block;
             text-align: left;
         }
         #timetableList li {
             background-color: #fff;
-            border-radius: 5px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin-bottom: 10px;
             text-align: left;
         }
-        .btn {
-            margin-top: 20px;
-        }
+    
     </style>
 </head>
 <body>
     <div class="container mt-5">
         <h1>병점스토리 - 시간표</h1>
+
+        <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
+            <div class="container">
+                <div class="collapse navbar-collapse">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <!-- 메뉴를 Bootstrap 네비게이션으로 변경 -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" id="homeLink">홈</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" id="announcementLink">급식</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" id="schoolInfoLink">시간표</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" id="communityLink">커뮤니티(베타)</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" id="fileshare">파일공유서비스</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
     
         <div class="mb-3">
             <label for="dateInput" class="form-label">날짜 선택: </label>
@@ -60,7 +75,6 @@
                 <option value="1">1학년</option>
                 <option value="2">2학년</option>
                 <option value="3">3학년</option>
-                  
             </select>
         </div>
         <div class="mb-3">
@@ -73,111 +87,24 @@
             <ul id="timetableList" class="list-group"></ul>
         </div>
         
-        <!-- 이동 버튼 추가 -->
-        <div class="btn-group" role="group" aria-label="Site navigation">
-            <button type="button" class="btn btn-primary" onclick="navigateToHome()">홈으로 이동</button>
-            <button type="button" class="btn btn-primary" onclick="navigateToMeal()">급식 페이지로 이동</button>
-            <button type="button" class="btn btn-primary" onclick="navigateToTimetable()">시간표 페이지로 이동</button>
-            <button type="button" class="btn btn-primary" onclick="navigateToCommunity()">커뮤니티 페이지로 이동</button>
-            <button type="button" class="btn btn-primary" onclick="navigateToFileShare()">파일공유서비스 페이지로 이동</button>
-        </div>
+       
     </div>
-
     <!-- Bootstrap JS and dependencies -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        // NEIS API endpoint URL for timetable data
-        const timetableURL = 'https://open.neis.go.kr/hub/hisTimetable';
-        const apiKey = 'fbffee9d42554d4287deb7e938e1b9bc';
-    
-   // Function to fetch timetable data for a specific grade, class, and date
-async function fetchTimetable( grade, classCode, date) {
-    try {
-        const response = await fetch(`${timetableURL}?KEY=${apiKey}&Type=json&pIndex=1&pSize=100&ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7530627&GRADE=${grade}&CLASS_NM=${classCode}&TI_FROM_YMD=${date}`);
-        const data = await response.json(); // Parse the JSON response directly
-        console.log("Timetable API Response:", data); // Log the response for debugging
-        return data;
-    } catch (error) {
-        console.error("Error fetching timetable data:", error);
-    }
-}
-
-// Function to handle grade selection change
-document.getElementById('gradeSelect').addEventListener('change', async function() {
-    const selectedGrade = this.value; // Get selected grade from the dropdown
-
-    // Set the class select to respective classes for each grade
-    const classSelect = document.getElementById('classSelect');
-    classSelect.innerHTML = ''; // Clear previous options
-    for (let i = 1; i <= 10; i++) {
-        const option = document.createElement('option');
-        option.value = i.toString();
-        option.textContent = `${i}반`;
-        classSelect.appendChild(option);
-    }
-    classSelect.disabled = false; // Enable class select
-
-    // Fetch timetable data for the selected grade and class
-    const selectedDate = document.getElementById('dateInput').value.replaceAll('-', ''); // Get selected date from the input and remove '-' characters
-    displayTimetable(selectedGrade, '1', selectedDate); // Default to 1반 when grade changes
-});
-
-// Function to handle class selection change
-document.getElementById('classSelect').addEventListener('change', function() {
-    const selectedDate = document.getElementById('dateInput').value.replaceAll('-', ''); // Get selected date from the input and remove '-' characters
-    const selectedGrade = document.getElementById('gradeSelect').value; // Get selected grade from the dropdown
-    const selectedClass = this.value; // Get selected class from the dropdown
-    displayTimetable(selectedGrade, selectedClass, selectedDate);
-});
-
-
-// Function to display timetable for a specific grade, class, and date
-async function displayTimetable(grade, classCode, date) {
-    try {
-        const response = await fetch(`${timetableURL}?KEY=${apiKey}&Type=json&pIndex=1&pSize=100&ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7530627&GRADE=${grade}&CLASS_NM=${classCode}&TI_FROM_YMD=${date}`);
-        const data = await response.json(); // Parse the JSON response directly
-        console.log("Timetable API Response:", data); // Log the response for debugging
-        
-        const timetableList = document.getElementById('timetableList');
-        timetableList.innerHTML = ''; // Clear any existing timetable items
-        
-        if (data && data.hisTimetable) {
-            const items = data.hisTimetable;
-            items.forEach(item => {
-                if (item.row) {
-                    const classTimetable = item.row;
-                    classTimetable.forEach(timetableItem => {
-                        if (timetableItem.ALL_TI_YMD === date && timetableItem.CLASS_NM === classCode) { // Filter by date and selected class
-                            const li = document.createElement('li');
-                            li.textContent = `[${timetableItem.CLASS_NM}반]| ${timetableItem.PERIO}교시: ${timetableItem.ITRT_CNTNT}`;
-                            li.classList.add('list-group-item');
-                            timetableList.appendChild(li);
-                        }
-                    });
-                }
-            });
-        } else {
-            console.error("Error fetching or processing timetable data:", data);
-        }
-    } catch (error) {
-        console.error("Error fetching timetable data:", error);
-    }
-}
-
         // Function to navigate to home page
-        function navigateToHome() {
+        function navigateTohome() {
             window.location.href = "index.html";
         }
 
         // Function to navigate to meal page
-        function navigateToMeal() {
+        function navigateTomeal() {
             window.location.href = "Dailybj_meal.html";
         }
 
         // Function to navigate to timetable page
-        function navigateToTimetable() {
+        function navigateTotimetable() {
             window.location.href = "Dailybj_timetable.html";
         }
 
@@ -187,45 +114,118 @@ async function displayTimetable(grade, classCode, date) {
         }
 
         // Function to navigate to file share page
-        function navigateToFileShare() {
+        function navigateTofileshare() {
             window.location.href = "Dailybj_fileshare.html";
         }
 
+
+        
+        // 각 메뉴에 이벤트 리스너를 추가하여 페이지 이동을 처리합니다.
+        document.getElementById('homeLink').addEventListener('click', function(event) {
+            event.preventDefault();
+            navigateTohome();
+        });
+        document.getElementById('announcementLink').addEventListener('click', function(event) {
+            event.preventDefault();
+            navigateTomeal();
+        });
+        document.getElementById('schoolInfoLink').addEventListener('click', function(event) {
+            event.preventDefault();
+            navigateTotimetable();
+        });
+        document.getElementById('communityLink').addEventListener('click', function(event) {
+            event.preventDefault();
+            navigateToCommunity();
+        });
+        document.getElementById('fileshare').addEventListener('click', function(event) {
+            event.preventDefault();
+            navigateTofileshare();
+        });
+
+        // NEIS API endpoint URL for timetable data
+        const timetableURL = 'https://open.neis.go.kr/hub/hisTimetable';
+        const apiKey = 'fbffee9d42554d4287deb7e938e1b9bc';
+
+        // Function to fetch timetable data for a specific grade, class, and date
+        async function fetchTimetable( grade, classCode, date) {
+            try {
+                const response = await fetch(`${timetableURL}?KEY=${apiKey}&Type=json&pIndex=1&pSize=100&ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7530627&GRADE=${grade}&CLASS_NM=${classCode}&TI_FROM_YMD=${date}`);
+                const data = await response.json(); // Parse the JSON response directly
+                console.log("Timetable API Response:", data); // Log the response for debugging
+                return data;
+            } catch (error) {
+                console.error("Error fetching timetable data:", error);
+            }
+        }
+
+        // Function to handle grade selection change
+        document.getElementById('gradeSelect').addEventListener('change', async function() {
+            const selectedGrade = this.value; // Get selected grade from the dropdown
+
+            // Set the class select to respective classes for each grade
+            const classSelect = document.getElementById('classSelect');
+            classSelect.innerHTML = ''; // Clear previous options
+            for (let i = 1; i <= 10; i++) {
+                const option = document.createElement('option');
+                option.value = i.toString();
+                option.textContent = `${i}반`;
+                classSelect.appendChild(option);
+            }
+            classSelect.disabled = false; // Enable class select
+
+            // Fetch timetable data for the selected grade and class
+            const selectedDate = document.getElementById('dateInput').value.replaceAll('-', ''); // Get selected date from the input and remove '-' characters
+            displayTimetable(selectedGrade, '1', selectedDate); // Default to 1반 when grade changes
+        });
+
+        // Function to handle class selection change
+        document.getElementById('classSelect').addEventListener('change', function() {
+            const selectedDate = document.getElementById('dateInput').value.replaceAll('-', ''); // Get selected date from the input and remove '-' characters
+            const selectedGrade = document.getElementById('gradeSelect').value; // Get selected grade from the dropdown
+            const selectedClass = this.value; // Get selected class from the dropdown
+            displayTimetable(selectedGrade, selectedClass, selectedDate);
+        });
+
+        // Function to display timetable for a specific grade, class, and date
+        async function displayTimetable(grade, classCode, date) {
+            try {
+                const response = await fetch(`${timetableURL}?KEY=${apiKey}&Type=json&pIndex=1&pSize=100&ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7530627&GRADE=${grade}&CLASS_NM=${classCode}&TI_FROM_YMD=${date}`);
+                const data = await response.json(); // Parse the JSON response directly
+                console.log("Timetable API Response:", data); // Log the response for debugging
+                
+                const timetableList = document.getElementById('timetableList');
+                timetableList.innerHTML = ''; // Clear any existing timetable items
+                
+                if (data && data.hisTimetable) {
+                    const items = data.hisTimetable;
+                    items.forEach(item => {
+                        if (item.row) {
+                            const classTimetable = item.row;
+                            classTimetable.forEach(timetableItem => {
+                                if (timetableItem.ALL_TI_YMD === date && timetableItem.CLASS_NM === classCode) { // Filter by date and selected class
+                                    const li = document.createElement('li');
+                                    li.textContent = `[${timetableItem.CLASS_NM}반]| ${timetableItem.PERIO}교시: ${timetableItem.ITRT_CNTNT}`;
+                                    li.classList.add('list-group-item');
+                                    timetableList.appendChild(li);
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    console.error("Error fetching or processing timetable data:", data);
+                }
+            } catch (error) {
+                console.error("Error fetching timetable data:", error);
+            }
+        }
+
         // Function to handle date selection change
-document.getElementById('dateInput').addEventListener('change', function() {
-    const selectedDate = this.value.replaceAll('-', ''); // Get selected date from the input and remove '-' characters
-    const selectedGrade = document.getElementById('gradeSelect').value; // Get selected grade from the dropdown
-    const selectedClass = document.getElementById('classSelect').value; // Get selected class from the dropdown
-    displayTimetable(selectedGrade, selectedClass, selectedDate);
-});
-
-// Function to handle grade selection change
-document.getElementById('gradeSelect').addEventListener('change', async function() {
-    const selectedGrade = this.value; // Get selected grade from the dropdown
-
-    // Set the class select to respective classes for each grade
-    const classSelect = document.getElementById('classSelect');
-    classSelect.innerHTML = ''; // Clear previous options
-    for (let i = 1; i <= 10; i++) {
-        const option = document.createElement('option');
-        option.value = i.toString();
-        option.textContent = `${i}반`;
-        classSelect.appendChild(option);
-    }
-    classSelect.disabled = false; // Enable class select
-
-    // Fetch timetable data for the selected grade and class
-    const selectedDate = document.getElementById('dateInput').value.replaceAll('-', ''); // Get selected date from the input and remove '-' characters
-    displayTimetable(selectedGrade, '1', selectedDate); // Default to 1반 when grade changes
-});
-
-// Function to handle class selection change
-document.getElementById('classSelect').addEventListener('change', function() {
-    const selectedDate = document.getElementById('dateInput').value.replaceAll('-', ''); // Get selected date from the input and remove '-' characters
-    const selectedGrade = document.getElementById('gradeSelect').value; // Get selected grade from the dropdown
-    const selectedClass = this.value; // Get selected class from the dropdown
-    displayTimetable(selectedGrade, selectedClass, selectedDate);
-});
+        document.getElementById('dateInput').addEventListener('change', function() {
+            const selectedDate = this.value.replaceAll('-', ''); // Get selected date from the input and remove '-' characters
+            const selectedGrade = document.getElementById('gradeSelect').value; // Get selected grade from the dropdown
+            const selectedClass = document.getElementById('classSelect').value; // Get selected class from the dropdown
+            displayTimetable(selectedGrade, selectedClass, selectedDate);
+        });
     </script>
 </body>
 </html>
