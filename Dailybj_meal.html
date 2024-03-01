@@ -7,7 +7,6 @@
     <!-- 부트스트랩 CSS 링크 추가 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
@@ -32,6 +31,7 @@
             background-color: #333;
             color: #fff;
             padding: 20px;
+            margin-top: 0;
         }
         label {
             font-size: 1.2em;
@@ -39,6 +39,8 @@
         }
         #dateInput {
             margin-bottom: 20px;
+            display: block;
+            margin: 0 auto;
         }
         #mealList {
             list-style-type: none;
@@ -70,7 +72,10 @@
     <h1>병점스토리 - 급식</h1>
     <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
         <div class="container">
-            <div class="collapse navbar-collapse">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <!-- 메뉴를 Bootstrap 네비게이션으로 변경 -->
                     <li class="nav-item">
@@ -107,8 +112,8 @@
     <!-- 부트스트랩 JS 링크 추가 -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-      // NEIS API endpoint URL for meal data
-      const mealURL = 'https://open.neis.go.kr/hub/mealServiceDietInfo';
+        // NEIS API endpoint URL for meal data
+        const mealURL = 'https://open.neis.go.kr/hub/mealServiceDietInfo';
         const apiKey = 'fbffee9d42554d4287deb7e938e1b9bc';
 
         // Function to fetch meal data for a specific date
@@ -157,42 +162,38 @@
         }
 
         // 페이지 이동을 처리하는 함수를 작성합니다.
-        function navigateTohome() {
-            // 여기에서 페이지 이동 로직을 추가합니다.
+        function navigateToHome() {
             window.location.href = "index.html";
         }
 
-        function navigateTotimetable() {
-            // 여기에서 페이지 이동 로직을 추가합니다.
+        function navigateToTimetable() {
             window.location.href = "Dailybj_timetable.html";
         }
 
         function navigateToCommunity() {
-            // 여기에서 페이지 이동 로직을 추가합니다.
             window.location.href = "Dailybj_community.html";
         }
 
-        function navigateTofileshare() {
-            // 여기에서 페이지 이동 로직을 추가합니다.
+        function navigateToFileshare() {
             window.location.href = "Dailybj_fileshare.html";
         }
 
         // 각 메뉴에 이벤트 리스너를 추가하여 페이지 이동을 처리합니다.
         document.getElementById('homeLink').addEventListener('click', function(event) {
             event.preventDefault();
-            navigateTohome(); // 함수 호출을 추가해야 합니다.
+            navigateToHome();
         });
-        document.getElementById('announcementLink').addEventListener('click', function(event) {
+        document.getElementById('schoolInfoLink').addEventListener('click', function(event) {
             event.preventDefault();
-            navigateTotimetable(); // 함수 호출을 추가해야 합니다.
+            navigateToTimetable();
         });
         document.getElementById('communityLink').addEventListener('click', function(event) {
             event.preventDefault();
-            navigateToCommunity(); // 함수 호출을 추가해야 합니다.
+            navigateToCommunity();
         });
         document.getElementById('fileshare').addEventListener('click', function(event) {
             event.preventDefault();
-            navigateTofileshare(); // 함수 호출을 추가해야 합니다.
+            navigateToFileshare();
         });
     </script>
 </body>
